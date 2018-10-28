@@ -77,8 +77,10 @@ describe("TogglApi", () => {
           expect(fetch.mock.calls.length).toEqual(1)
           expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
           expect(response).toEqual({
-            entry: null,
-            project: null,
+            data: {
+              entry: null,
+              project: null,
+            }
           })
         })
       })
@@ -106,8 +108,10 @@ describe("TogglApi", () => {
           expect(fetch.mock.calls.length).toEqual(1)
           expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
           expect(response).toEqual({
-            entry: "Example Running Time Entry",
-            project: "Project Three",
+            data: {
+              entry: "Example Running Time Entry",
+              project: "Project Three",
+            }
           })
         })
       })

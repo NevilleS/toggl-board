@@ -6,8 +6,10 @@ interface TogglApiSettings {
 }
 
 interface TogglApiState {
-  entry: string | null
-  project: string | null
+  data: {
+    entry: string | null
+    project: string | null
+  }
 }
 
 interface TogglApiCurrentUser {
@@ -58,16 +60,20 @@ const TogglApi = {
     const currentEntry = timeEntries.find(entry => entry.duration < 0)
     if (!currentEntry) {
       return {
-        entry: null,
-        project: null,
+        data: {
+          entry: null,
+          project: null,
+        }
       }
     }
 
     // Join against a matching project, if found
     const currentProject = projects.find(project => project.id == currentEntry.pid) || { name: null }
     return {
-      entry: currentEntry.description,
-      project: currentProject.name,
+      data: {
+        entry: currentEntry.description,
+        project: currentProject.name,
+      }
     }
   },
 
