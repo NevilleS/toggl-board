@@ -2,7 +2,7 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
-  dockerImage: 'toggl-board:$(Build.BuildId)'
+  dockerImage: 'toggl-board'
 
 steps:
 - task: NodeTool@0
