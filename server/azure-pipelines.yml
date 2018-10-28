@@ -6,7 +6,7 @@ variables:
 
 steps:
 - task: NodeTool@0
-  displayName: 'configure node version'
+  displayName: 'Configure node version'
   inputs:
     versionSpec: '8.x'
 
@@ -14,21 +14,22 @@ steps:
     cd server
     npm install
     npm test
-  displayName: 'npm test'
+  displayName: 'Run test suite'
 
 - task: PublishTestResults@2
-  displayName: 'publish test results'
+  displayName: 'Publish test results'
   inputs:
     testResultsFiles: 'server/junit.xml'
     testRunTitle: 'Test Results'
 
 - script: |
     cd server
+    docker login -u $(dockerId) -p $(dockerPassword)
     docker build -f Dockerfile -t $(dockerId)/$(dockerImage) .
-  displayName: 'docker build'
+  displayName: 'Build docker image'
 
 - script: |
     cd server
     docker login -u $(dockerId) -p $(dockerPassword)
     docker push $(dockerId)/$(dockerImage)
-  displayName: 'docker push'
+  displayName: 'Push docker image'
