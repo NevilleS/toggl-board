@@ -4,9 +4,12 @@
   "description": "Web application to manage the TogglBoard device.",
   "scripts": {
     "build": "echo \"Error: no build specified\" && exit 1",
+    "serve": "npm start",
     "start": "ts-node src/server.ts",
     "test": "jest --verbose",
-    "watch-test": "npm run test -- --watchAll"
+    "watch-test": "npm run test -- --watchAll",
+    "docker-build": "docker build -t nevilles/toggl-board .",
+    "docker-run": "docker run -p 9292:8080 --env-file .env nevilles/toggl-board"
   },
   "repository": {
     "type": "git",

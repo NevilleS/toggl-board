@@ -20,6 +20,7 @@ const server = app.listen(app.get("port"), () => {
   )
   console.log(dedent`
     Current configuration (edit '.env' file to modify):
+      NODE_ENV=${process.env.NODE_ENV}
       DEBUG=${process.env.DEBUG}
       PORT=${process.env.PORT}
       TOGGL_API_TOKEN=${process.env.TOGGL_API_TOKEN}
