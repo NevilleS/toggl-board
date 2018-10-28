@@ -11,6 +11,7 @@ steps:
 
 - script: |
     cd server
+    npm install
     npm test
   displayName: 'npm test'
 
