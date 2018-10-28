@@ -1,4 +1,5 @@
 import TogglApi from "../src/toggl_api"
+declare var fetch: any; // TODO: unsure why this is needed only for tests
 
 describe("TogglApi", () => {
   beforeEach(() => {
