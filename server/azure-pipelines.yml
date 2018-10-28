@@ -2,7 +2,7 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
-  dockerImage: 'toggl-board'
+  dockerImage: 'toggl-board:$(Build.BuildId)'
 
 steps:
 - task: NodeTool@0
@@ -27,3 +27,8 @@ steps:
     docker build -f Dockerfile -t $(dockerId)/$(dockerImage) .
   displayName: 'docker build'
 
+- script: |
+    cd server
+    docker login -u $(dockerId) -p $(dockerPassword)
+    docker push $(dockerId)/$(dockerImage)
+  displayName: 'docker push'
