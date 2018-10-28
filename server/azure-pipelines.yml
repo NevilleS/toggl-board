@@ -6,6 +6,7 @@ variables:
 
 steps:
 - task: NodeTool@0
+  displayName: 'configure node version'
   inputs:
     versionSpec: '8.x'
 
@@ -18,7 +19,7 @@ steps:
 - task: PublishTestResults@2
   displayName: 'publish test results'
   inputs:
-    testResultsFiles: 'junit.xml'
+    testResultsFiles: 'server/junit.xml'
     testRunTitle: 'Test Results'
 
 - script: |
