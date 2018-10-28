@@ -10,3 +10,8 @@ steps:
     npm run test -- --ci
     docker build -f Dockerfile -t $(dockerId)/$(dockerImage) .
   displayName: 'docker build'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: 'junit.xml'
+    testRunTitle: 'Test Results'
