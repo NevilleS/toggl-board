@@ -1,5 +1,7 @@
 # TogglBoard
 [![Build Status](https://dev.azure.com/nevilles/nevilles/_apis/build/status/NevilleS.toggl-board)](https://dev.azure.com/nevilles/nevilles/_build/latest?definitionId=1)
+[![Dependencies](https://david-dm.org/NevilleS/toggl-board.svg?path=server)](https://david-dm.org/NevilleS/toggl-board?path=server)
+[![Dev Dependencies](https://david-dm.org/NevilleS/toggl-board/dev-status.svg?path=server)](https://david-dm.org/NevilleS/toggl-board?path=server&type=dev)
 
 The most overly complicated time-tracking device ever created!
 
