@@ -5,13 +5,15 @@ variables:
   dockerImage: 'toggl-board'
 
 steps:
-- script: |
-    npm install
-    npm run test -- --ci
-    docker build -f Dockerfile -t $(dockerId)/$(dockerImage) .
-  displayName: 'docker build'
+- script: npm install
+
+- script: npm test
 
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: 'junit.xml'
     testRunTitle: 'Test Results'
+
+- script: docker build -f Dockerfile -t $(dockerId)/$(dockerImage) .
+  displayName: 'docker build'
+
