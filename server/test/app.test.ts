@@ -38,7 +38,7 @@ describe("app", () => {
       const response = await request(app).get("/current")
       expect(response.status).toEqual(200)
       expect(response.body).toEqual({ data: mockResponseData })
-      expect(TogglApi.test).toBeCalledWith({ apiToken: "your API token" })
+      expect(TogglApi.getCurrentUser).toBeCalledWith({ apiToken: "your API token" })
     })
   })
 })

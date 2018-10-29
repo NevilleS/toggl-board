@@ -26,7 +26,7 @@ app.get("/current", async function current(req, res) {
   if (!apiToken) {
     throw new Error("TOGGL_API_TOKEN is not configured")
   }
-  const response = await TogglApi.current({ apiToken: apiToken })
+  const response = await TogglApi.getCurrentState({ apiToken: apiToken })
   res.send({
     data: response
   })

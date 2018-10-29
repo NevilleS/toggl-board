@@ -176,7 +176,7 @@ describe("TogglApi", () => {
           [
             JSON.stringify({
               "data": {
-                "id": 13,
+                "id": 14,
                 "pid": 1,
                 "start": "2018-10-29T02:42:18Z",
                 "duration": -1540780938,
@@ -207,7 +207,7 @@ describe("TogglApi", () => {
         })
         expect(response).toEqual({
           entry: "Testing new entry",
-          entryId: 13,
+          entryId: 14,
           project: "Project One",
           projectId: 1,
         })
@@ -225,8 +225,9 @@ describe("TogglApi", () => {
                 "id": 13,
                 "pid": 1,
                 "start": "2018-10-29T02:42:18Z",
-                "duration": -1540780938,
-                "description": "Testing new entry",
+                "stop": "2018-10-29T02:42:48Z",
+                "duration": 30,
+                "description": "Example Running Time Entry",
               }
             }),
             { status: 200 }
@@ -240,7 +241,7 @@ describe("TogglApi", () => {
 
         expect(fetch.mock.calls.length).toEqual(2)
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
-        expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries/11/stop")
+        expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries/13/stop")
         expect(fetch.mock.calls[1][1]).toMatchObject({
           method: "PUT",
           body: undefined,
@@ -262,7 +263,7 @@ describe("TogglApi", () => {
           [
             JSON.stringify({
               "data": {
-                "id": 13,
+                "id": 14,
                 "start": "2018-10-29T02:42:18Z",
                 "duration": -1540780938,
                 "description": "Testing new entry",
@@ -291,7 +292,7 @@ describe("TogglApi", () => {
         })
         expect(response).toEqual({
           entry: "Testing new entry",
-          entryId: 13,
+          entryId: 14,
           project: null,
           projectId: null,
         })

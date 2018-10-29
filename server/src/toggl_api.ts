@@ -110,8 +110,22 @@ const TogglApi = {
 
     // If the state is null, stop the current entry
     if (!state.entry && !state.projectId) {
-      throw new Error("Not implemented!")
-      return currentState
+      const response = await TogglApi.fetch(
+        `https://www.toggl.com/api/v8/time_entries/${currentState.entryId}/stop`,
+        settings,
+        {
+          method: "PUT",
+        }
+      ) as { data: TogglApiTimeEntry }
+      if (!response || !response.data) {
+        throw new Error("Unexpected Toggl response!")
+      }
+      return {
+        entry: null,
+        entryId: null,
+        project: null,
+        projectId: null,
+      }
     }
 
     // Build a new entry
@@ -132,9 +146,21 @@ const TogglApi = {
         body: { "time_entry": timeEntry },
       }
     ) as { data: TogglApiTimeEntry }
+    if (!response || !response.data) {
+      throw new Error("Unexpected Toggl response!")
+    }
 
-    // TODO: join against current user data
-    return currentState
+    // Join the new entry against the current user data to return the new state
+    const newEntry = response.data
+    if (newEntry.pid) {
+      var newProject = currentUser.projects.find(project => project.id == newEntry.pid)
+    }
+    return {
+      entry: newEntry.description || null,
+      entryId: newEntry.id || null,
+      project: (newProject && newProject.name) || null,
+      projectId: (newProject && newProject.id) || null,
+    }
   },
 
   fetch: async function(url: string, settings: TogglApiSettings, opts = {}): Promise<Object> {
