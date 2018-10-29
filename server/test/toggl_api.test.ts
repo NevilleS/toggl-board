@@ -242,10 +242,8 @@ describe("TogglApi", () => {
         expect(fetch.mock.calls.length).toEqual(2)
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
         expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries/13/stop")
-        expect(fetch.mock.calls[1][1]).toMatchObject({
-          method: "PUT",
-          body: undefined,
-        })
+        expect(fetch.mock.calls[1][1]).toMatchObject({ method: "PUT" })
+        expect(fetch.mock.calls[1][1]).not.toHaveProperty("body")
         expect(response).toEqual({
           entry: null,
           entryId: null,

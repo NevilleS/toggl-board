@@ -33,12 +33,12 @@ describe("app", () => {
 
   describe("GET /current", () => {
     it("should return current Toggl API state", async () => {
-      const mockResponseData = { entry: "Test Entry", project: "Test Project", projectId: 1 }
-      ;(TogglApi.getCurrentUser as any).mockResolvedValue(mockResponseData)
+      const mockResponseData = { entry: "Test Entry", entryId: 10, project: "Test Project", projectId: 1 }
+      ;(TogglApi.getCurrentState as any).mockResolvedValue(mockResponseData)
       const response = await request(app).get("/current")
       expect(response.status).toEqual(200)
       expect(response.body).toEqual({ data: mockResponseData })
-      expect(TogglApi.getCurrentUser).toBeCalledWith({ apiToken: "your API token" })
+      expect(TogglApi.getCurrentState).toBeCalledWith({ apiToken: "your API token" })
     })
   })
 })
