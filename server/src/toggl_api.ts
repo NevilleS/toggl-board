@@ -1,4 +1,5 @@
 import "isomorphic-fetch"
+import { isEqual } from "lodash"
 declare const fetch: any // NOTE: this offends my sensibilities
 
 interface TogglApiSettings {
@@ -6,17 +7,14 @@ interface TogglApiSettings {
 }
 
 interface TogglApiState {
-  data: {
-    entry: string | null
-    project: string | null
-  }
+  entry: string | null
+  project: string | null
+  projectId: number | null
 }
 
 interface TogglApiCurrentUser {
-  data: {
-    projects: TogglApiProject[]
-    time_entries: TogglApiTimeEntry[]
-  }
+  projects: TogglApiProject[]
+  time_entries: TogglApiTimeEntry[]
 }
 
 interface TogglApiProject {
@@ -44,7 +42,7 @@ const TogglApi = {
     const response = await TogglApi.fetch(
       "https://www.toggl.com/api/v8/me?with_related_data=true",
       settings
-    ) as TogglApiCurrentUser
+    ) as { data: TogglApiCurrentUser }
 
     // Ensure it has all the data we expect...
     if (!response.data || !response.data.projects || !response.data.time_entries) {
@@ -60,21 +58,42 @@ const TogglApi = {
     const currentEntry = timeEntries.find(entry => entry.duration < 0)
     if (!currentEntry) {
       return {
-        data: {
-          entry: null,
-          project: null,
-        }
+        entry: null,
+        project: null,
+        projectId: null,
       }
     }
 
     // Join against a matching project, if found
-    const currentProject = projects.find(project => project.id == currentEntry.pid) || { name: null }
+    const currentProject = projects.find(project => project.id == currentEntry.pid) || { name: null, id: null }
     return {
-      data: {
-        entry: currentEntry.description,
-        project: currentProject.name,
-      }
+      entry: currentEntry.description,
+      project: currentProject.name,
+      projectId: currentProject.id,
     }
+  },
+
+  setCurrentState: async function(state: TogglApiState, settings: TogglApiSettings): Promise<TogglApiState> {
+    // Ensure the new state is valid
+    if (!state) {
+      throw new Error("Invalid new TogglApiState specified!")
+    }
+
+    // Get the current state from Toggl
+    const currentState = await TogglApi.current(settings)
+
+    // Early exit if state matches
+    if (isEqual(state, currentState)) {
+      return currentState
+    }
+
+    // Find a matching project, if specified
+    if (state.project) {
+      throw new Error("Not implemented!")
+    }
+
+    // TODO: Actually set state
+    return state
   },
 
   fetch: async function(url: string, settings: TogglApiSettings): Promise<Object> {

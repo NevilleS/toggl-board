@@ -39,8 +39,7 @@
   "jest": {
     "automock": false,
     "globals": {
-      "ts-jest": {
-      }
+      "ts-jest": {}
     },
     "reporters": [
       "default",
@@ -63,8 +62,10 @@
   },
   "dependencies": {
     "@types/dedent": "^0.7.0",
+    "@types/lodash": "^4.14.117",
     "dedent": "^0.7.0",
     "dotenv": "^6.1.0",
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "lodash": "^4.17.11"
   }
 }

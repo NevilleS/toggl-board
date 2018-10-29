@@ -27,7 +27,9 @@ app.get("/current", async function current(req, res) {
     throw new Error("TOGGL_API_TOKEN is not configured")
   }
   const response = await TogglApi.current({ apiToken: apiToken })
-  res.send(response)
+  res.send({
+    data: response
+  })
 })
 
 export default app
