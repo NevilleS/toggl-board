@@ -2,13 +2,21 @@ import "isomorphic-fetch"
 import { isEqual } from "lodash"
 declare const fetch: any // NOTE: this offends my sensibilities
 
+const APP_NAME = "TogglBoard"
+
 interface TogglApiSettings {
   apiToken: string
 }
 
-interface TogglApiState {
+interface TogglBoardState {
   entry: string | null
+  entryId: number | null
   project: string | null
+  projectId: number | null
+}
+
+interface TogglBoardNewState {
+  entry: string | null
   projectId: number | null
 }
 
@@ -23,12 +31,13 @@ interface TogglApiProject {
 }
 
 interface TogglApiTimeEntry {
-  id: number
+  created_with?: string
+  description?: string
+  duration?: number
+  id?: number
   pid?: number
   start?: string
   stop?: string
-  duration: number
-  description: string
 }
 
 const TogglApi = {
@@ -37,7 +46,7 @@ const TogglApi = {
     return response
   },
 
-  current: async function(settings: TogglApiSettings): Promise<TogglApiState> {
+  getCurrentUser: async function(settings: TogglApiSettings): Promise<TogglApiCurrentUser> {
     // Get the current user data from Toggl
     const response = await TogglApi.fetch(
       "https://www.toggl.com/api/v8/me?with_related_data=true",
@@ -53,54 +62,86 @@ const TogglApi = {
     if (!Array.isArray(projects) || !Array.isArray(timeEntries)) {
       throw new Error("Unexpected Toggl response!")
     }
+    return response.data
+  },
 
-    // Find a running time entry
-    const currentEntry = timeEntries.find(entry => entry.duration < 0)
+  extractCurrentState(currentUser: TogglApiCurrentUser): TogglBoardState {
+    // Extract the current entry & project from the TogglApi data
+    const currentEntry = currentUser.time_entries.find(entry => !!(entry.duration && entry.duration < 0))
     if (!currentEntry) {
       return {
         entry: null,
+        entryId: null,
         project: null,
         projectId: null,
       }
     }
 
     // Join against a matching project, if found
-    const currentProject = projects.find(project => project.id == currentEntry.pid) || { name: null, id: null }
+    const currentProject = currentUser.projects.find(project => project.id == currentEntry.pid)
     return {
-      entry: currentEntry.description,
-      project: currentProject.name,
-      projectId: currentProject.id,
+      entry: currentEntry.description || null,
+      entryId: currentEntry.id || null,
+      project: (currentProject && currentProject.name) || null,
+      projectId: (currentProject && currentProject.id) || null,
     }
   },
 
-  setCurrentState: async function(state: TogglApiState, settings: TogglApiSettings): Promise<TogglApiState> {
+  current: async function(settings: TogglApiSettings): Promise<TogglBoardState> {
+    const currentUser = await TogglApi.getCurrentUser(settings)
+    return TogglApi.extractCurrentState(currentUser)
+  },
+
+  setCurrentState: async function(state: TogglBoardNewState, settings: TogglApiSettings): Promise<TogglBoardState> {
     // Ensure the new state is valid
     if (!state) {
-      throw new Error("Invalid new TogglApiState specified!")
+      throw new Error("Invalid TogglBoardNewState specified!")
     }
 
     // Get the current state from Toggl
-    const currentState = await TogglApi.current(settings)
+    const currentUser = await TogglApi.getCurrentUser(settings)
+    const currentState = TogglApi.extractCurrentState(currentUser)
 
     // Early exit if state matches
-    if (isEqual(state, currentState)) {
+    // NOTE: Ignore entryId (assigned by Toggl) and projectName (only for display)
+    if (state.entry == currentState.entry && state.projectId == currentState.projectId) {
       return currentState
     }
 
-    // Find a matching project, if specified
-    if (state.project) {
+    // If the state is null, stop the current entry
+    if (!state.entry && !state.projectId) {
       throw new Error("Not implemented!")
+      return currentState
     }
 
-    // TODO: Actually set state
-    return state
+    // Build a new entry
+    let timeEntry: TogglApiTimeEntry = { created_with: APP_NAME }
+    if (state.entry) {
+      timeEntry.description = state.entry
+    }
+    if (state.projectId) {
+      timeEntry.pid = state.projectId
+    }
+
+    // Start a new time entry
+    const response = await TogglApi.fetch(
+      "https://www.toggl.com/api/v8/time_entries/start",
+      settings,
+      {
+        method: "POST",
+        body: { "time_entry": timeEntry },
+      }
+    ) as { data: TogglApiTimeEntry }
+
+    // TODO: join against current user data
+    return currentState
   },
 
-  fetch: async function(url: string, settings: TogglApiSettings): Promise<Object> {
-    const response = await fetch(url, {
+  fetch: async function(url: string, settings: TogglApiSettings, opts = {}): Promise<Object> {
+    const response = await fetch(url, Object.assign({
       method: "GET",
       headers: TogglApi.getHeaders(settings),
-    })
+    }, opts))
     if (response.ok) {
       const json = await response.json()
       return json

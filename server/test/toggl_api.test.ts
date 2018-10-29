@@ -77,6 +77,7 @@ describe("TogglApi", () => {
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
         expect(response).toEqual({
           entry: null,
+          entryId: null,
           project: null,
           projectId: null,
         })
@@ -107,6 +108,7 @@ describe("TogglApi", () => {
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
         expect(response).toEqual({
           entry: "Example Running Time Entry",
+          entryId: 13,
           project: "Project Three",
           projectId: 3,
         })
@@ -150,7 +152,6 @@ describe("TogglApi", () => {
 
         const response = await TogglApi.setCurrentState({
           entry: "Example Running Time Entry",
-          project: "Project Three",
           projectId: 3,
         }, settings)
 
@@ -158,6 +159,7 @@ describe("TogglApi", () => {
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
         expect(response).toEqual({
           entry: "Example Running Time Entry",
+          entryId: 13,
           project: "Project Three",
           projectId: 3,
         })
@@ -187,13 +189,12 @@ describe("TogglApi", () => {
 
         const response = await TogglApi.setCurrentState({
           entry: "Testing new entry",
-          project: "Project One",
           projectId: 1,
         }, settings)
 
         expect(fetch.mock.calls.length).toEqual(2)
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
-        expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries")
+        expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries/start")
         expect(fetch.mock.calls[1][1]).toMatchObject({
           method: "POST",
           body: expect.objectContaining({
@@ -206,10 +207,52 @@ describe("TogglApi", () => {
         })
         expect(response).toEqual({
           entry: "Testing new entry",
+          entryId: 13,
           project: "Project One",
           projectId: 1,
         })
       })
+
+      it("stops the current entry when new state is null", async () => {
+        fetch.mockResponses(
+          [
+            JSON.stringify(currentResponseData),
+            { status: 200 }
+          ],
+          [
+            JSON.stringify({
+              "data": {
+                "id": 13,
+                "pid": 1,
+                "start": "2018-10-29T02:42:18Z",
+                "duration": -1540780938,
+                "description": "Testing new entry",
+              }
+            }),
+            { status: 200 }
+          ],
+        )
+
+        const response = await TogglApi.setCurrentState({
+          entry: null,
+          projectId: null,
+        }, settings)
+
+        expect(fetch.mock.calls.length).toEqual(2)
+        expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
+        expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries/11/stop")
+        expect(fetch.mock.calls[1][1]).toMatchObject({
+          method: "PUT",
+          body: undefined,
+        })
+        expect(response).toEqual({
+          entry: null,
+          entryId: null,
+          project: null,
+          projectId: null,
+        })
+      })
+
       it("allows for null projects", async () => {
         fetch.mockResponses(
           [
@@ -231,13 +274,12 @@ describe("TogglApi", () => {
 
         const response = await TogglApi.setCurrentState({
           entry: "Testing new entry",
-          project: null,
           projectId: null,
         }, settings)
 
         expect(fetch.mock.calls.length).toEqual(2)
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
-        expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries")
+        expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries/start")
         expect(fetch.mock.calls[1][1]).toMatchObject({
           method: "POST",
           body: expect.objectContaining({
@@ -249,6 +291,7 @@ describe("TogglApi", () => {
         })
         expect(response).toEqual({
           entry: "Testing new entry",
+          entryId: 13,
           project: null,
           projectId: null,
         })
