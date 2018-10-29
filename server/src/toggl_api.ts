@@ -87,7 +87,7 @@ const TogglApi = {
     }
   },
 
-  current: async function(settings: TogglApiSettings): Promise<TogglBoardState> {
+  getCurrentState: async function(settings: TogglApiSettings): Promise<TogglBoardState> {
     const currentUser = await TogglApi.getCurrentUser(settings)
     return TogglApi.extractCurrentState(currentUser)
   },

@@ -62,7 +62,7 @@ describe("TogglApi", () => {
     })
   })
 
-  describe("current()", () => {
+  describe("getCurrentState()", () => {
     describe("when no current time entry", () => {
       it("should return a null time entry", async () => {
         fetch.mockResponse(JSON.stringify({
@@ -72,7 +72,7 @@ describe("TogglApi", () => {
           }
         }))
 
-        const response = await TogglApi.current(settings)
+        const response = await TogglApi.getCurrentState(settings)
         expect(fetch.mock.calls.length).toEqual(1)
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
         expect(response).toEqual({
@@ -103,7 +103,7 @@ describe("TogglApi", () => {
           }
         }))
 
-        const response = await TogglApi.current(settings)
+        const response = await TogglApi.getCurrentState(settings)
         expect(fetch.mock.calls.length).toEqual(1)
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
         expect(response).toEqual({
@@ -124,7 +124,7 @@ describe("TogglApi", () => {
           }
         }))
 
-        await expect(TogglApi.current(settings)).rejects.toThrow("Unexpected Toggl response!")
+        await expect(TogglApi.getCurrentState(settings)).rejects.toThrow("Unexpected Toggl response!")
       })
     })
   })
