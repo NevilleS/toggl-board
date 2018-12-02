@@ -1,6 +1,8 @@
 # TogglBoard Server
 
-## Without Docker
+This folder contains the source code for the TogglBoard Server that connects the device to the Toggl API. For more info, see the [README](../README.md)
+
+## Usage: Without Docker
 
 ### Setup
 1. `npm install`
@@ -10,17 +12,17 @@
 ### Running
 `npm start`
 
+### Testing
+Use `npm test` to run the test suite.
+Use `npm run watch-test` to continuously run the test suite when developing.
+
 ### Configuration
 Config variables are set via a `.env` file in this directory, e.g.:
 ```
 echo "TOGGL_API_TOKEN='myapitokengoeshere'" > .env
 ```
 
-### Testing
-Use `npm test` to run the test suite.
-Use `npm run watch-test` to continuously run the test suite when developing.
-
-## With Docker
+## Usage: With Docker
 
 ### Setup
 `docker build -t <tag> .`

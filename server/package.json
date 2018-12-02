@@ -1,7 +1,7 @@
 {
-  "name": "toggl-board",
+  "name": "toggl-board-server",
   "version": "0.1.0",
-  "description": "Web application to manage the TogglBoard device.",
+  "description": "Web server to manage the TogglBoard device.",
   "scripts": {
     "build": "echo \"Error: no build specified\" && exit 1",
     "serve": "npm start",

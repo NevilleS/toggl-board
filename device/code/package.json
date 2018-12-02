@@ -1,0 +1,28 @@
+{
+  "name": "toggl-board-device",
+  "version": "0.1.0",
+  "description": "Microcontroller code to operate the TogglBoard device.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "setup": "particle login && particle setup",
+    "particle": "particle",
+    "build": "npm run compile",
+    "compile": "particle compile core toggl-board-device.ino",
+    "flash": "particle flash <DEVICE NAME> toggl-board-device.ino"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NevilleS/toggl-board.git"
+  },
+  "author": "Neville Samuell",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NevilleS/toggl-board/issues"
+  },
+  "homepage": "https://github.com/NevilleS/toggl-board#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "particle-cli": "^1.35.2"
+  }
+}
