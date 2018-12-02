@@ -4,7 +4,7 @@ This folder contains the design files for the TogglBoard Device with the physica
 
 ## Schematic
 
-![EasyEDA Schematic](./schematic/Schematic_toggl-board-device_TogglBoard-Device_20181201224711.png)
+![EasyEDA Schematic](./schematic/schematic_copy.png)
 
 ## BOM
 
