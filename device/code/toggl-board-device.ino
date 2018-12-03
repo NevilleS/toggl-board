@@ -24,22 +24,24 @@ float CONTROL_KD = 0.1;
 
 // Configure pinout
 // NOTE: do not set the pinMode() with analogRead(), just use analogRead()
-int PIN_SLIDE_POSITION_SENSE = A0;
-int PIN_A1 = A1;
-int PIN_A2 = A2;
-int PIN_A3 = A3;
-int PIN_A4 = A4;
-int PIN_A5 = A5;
-int PIN_A6 = A6;
-int PIN_A7 = A7;
-int PIN_D0 = D0;
-int PIN_D1 = D1;
-int PIN_D2 = D2;
-int PIN_D3 = D3;
-int PIN_D4 = D4;
-int PIN_D5 = D5;
-int PIN_D6 = D6;
-int PIN_D7 = D7;
+int PIN_MOTOR_STBY = A1;
+int PIN_MOTOR_AIN1 = A2;
+int PIN_MOTOR_AIN2 = A3;
+int PIN_MOTOR_PWMA = A4;
+int PIN_SLIDE_POSITION_SENSE = A5;
+int PIN_LED_NO_PROJECT = D2;
+int PIN_SHIFT_A = D3;
+int PIN_SHIFT_LATCH = D4;
+int PIN_SHIFT_SHIFT = D5;
+int PIN_SHIFT_RESET = D6;
+
+// Unused
+// int PIN_A0 = A0;
+// int PIN_A6 = A6;
+// int PIN_A7 = A7;
+// int PIN_D0 = D0;
+// int PIN_D1 = D1;
+// int PIN_D7 = D7;
 
 // Use primary serial over USB interface for logging output
 SerialLogHandler logHandler;
@@ -196,8 +198,7 @@ void loopControl() {
     "loopControl(): error %d, errorDelta %d, errorIntegral %d",
     error, errorDelta, g_errorIntegral
   );
-  int control = 0;
-  // TODO: Compute the actual control value based on gains
+  int control = (error * CONTROL_KP) + (g_errorIntegral * CONTROL_KI) + (errorDelta * CONTROL_KD);
 
   Log.info(
     "EXIT loopControl(): target %d, actual %d, error %d -> control %d",

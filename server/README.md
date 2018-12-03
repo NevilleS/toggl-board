@@ -1,6 +1,6 @@
 # TogglBoard Server
 
-This folder contains the source code for the TogglBoard Server that connects the device to the Toggl API. For more info, see the [README](../README.md)
+This folder contains the source code for the TogglBoard Server that connects the device to the Toggl API.
 
 ## Usage: Without Docker
 
