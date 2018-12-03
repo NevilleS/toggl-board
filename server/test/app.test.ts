@@ -23,7 +23,8 @@ describe("app", () => {
 
   describe("GET /test", () => {
     it("should test Toggl API", async () => {
-      ;(TogglApi.test as any).mockResolvedValue(true)
+      const mockResponseData = { message: "Successfully connected to Toggl API", data: {} }
+      ;(TogglApi.test as any).mockResolvedValue(mockResponseData)
       const response = await request(app).get("/test")
       expect(response.status).toEqual(200)
       expect(response.body).toEqual({ message: "Successfully connected to Toggl API", data: {} })
