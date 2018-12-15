@@ -4,33 +4,33 @@ declare const fetch: any // NOTE: this offends my sensibilities
 
 const APP_NAME = "TogglBoard"
 
-interface TogglApiSettings {
+interface TogglAPISettings {
   apiToken: string
 }
 
-interface TogglApiState {
+interface TogglAPIState {
   entry: string | null
   entryId: number | null
   project: string | null
   projectId: number | null
 }
 
-interface TogglApiNewState {
+interface TogglAPINewState {
   entry: string | null
   projectId: number | null
 }
 
-interface TogglApiCurrentUser {
-  projects: TogglApiProject[]
-  time_entries: TogglApiTimeEntry[]
+interface TogglAPICurrentUser {
+  projects: TogglAPIProject[]
+  time_entries: TogglAPITimeEntry[]
 }
 
-interface TogglApiProject {
+interface TogglAPIProject {
   id: number
   name: string
 }
 
-interface TogglApiTimeEntry {
+interface TogglAPITimeEntry {
   created_with?: string
   description?: string
   duration?: number
@@ -40,18 +40,18 @@ interface TogglApiTimeEntry {
   stop?: string
 }
 
-const TogglApi = {
-  test: async function(settings: TogglApiSettings): Promise<Object> {
-    const response = await TogglApi.fetch("https://www.toggl.com/api/v8/me", settings)
+const TogglAPI = {
+  test: async function(settings: TogglAPISettings): Promise<Object> {
+    const response = await TogglAPI.fetch("https://www.toggl.com/api/v8/me", settings)
     return response
   },
 
-  getCurrentUser: async function(settings: TogglApiSettings): Promise<TogglApiCurrentUser> {
+  getCurrentUser: async function(settings: TogglAPISettings): Promise<TogglAPICurrentUser> {
     // Get the current user data from Toggl
-    const response = await TogglApi.fetch(
+    const response = await TogglAPI.fetch(
       "https://www.toggl.com/api/v8/me?with_related_data=true",
       settings
-    ) as { data: TogglApiCurrentUser }
+    ) as { data: TogglAPICurrentUser }
 
     // Ensure it has all the data we expect...
     if (!response.data || !response.data.projects || !response.data.time_entries) {
@@ -65,8 +65,8 @@ const TogglApi = {
     return response.data
   },
 
-  extractCurrentState(currentUser: TogglApiCurrentUser): TogglApiState {
-    // Extract the current entry & project from the TogglApi data
+  extractCurrentState(currentUser: TogglAPICurrentUser): TogglAPIState {
+    // Extract the current entry & project from the TogglAPI data
     const currentEntry = currentUser.time_entries.find(entry => !!(entry.duration && entry.duration < 0))
     if (!currentEntry) {
       return {
@@ -87,20 +87,20 @@ const TogglApi = {
     }
   },
 
-  getCurrentState: async function(settings: TogglApiSettings): Promise<TogglApiState> {
-    const currentUser = await TogglApi.getCurrentUser(settings)
-    return TogglApi.extractCurrentState(currentUser)
+  getCurrentState: async function(settings: TogglAPISettings): Promise<TogglAPIState> {
+    const currentUser = await TogglAPI.getCurrentUser(settings)
+    return TogglAPI.extractCurrentState(currentUser)
   },
 
-  setCurrentState: async function(state: TogglApiNewState, settings: TogglApiSettings): Promise<TogglApiState> {
+  setCurrentState: async function(state: TogglAPINewState, settings: TogglAPISettings): Promise<TogglAPIState> {
     // Ensure the new state is valid
     if (!state) {
-      throw new Error("Invalid TogglApiNewState specified!")
+      throw new Error("Invalid TogglAPINewState specified!")
     }
 
     // Get the current state from Toggl
-    const currentUser = await TogglApi.getCurrentUser(settings)
-    const currentState = TogglApi.extractCurrentState(currentUser)
+    const currentUser = await TogglAPI.getCurrentUser(settings)
+    const currentState = TogglAPI.extractCurrentState(currentUser)
 
     // Early exit if state matches
     // NOTE: Ignore entryId (assigned by Toggl) and projectName (only for display)
@@ -110,13 +110,13 @@ const TogglApi = {
 
     // If the state is null, stop the current entry
     if (!state.entry && !state.projectId) {
-      const response = await TogglApi.fetch(
+      const response = await TogglAPI.fetch(
         `https://www.toggl.com/api/v8/time_entries/${currentState.entryId}/stop`,
         settings,
         {
           method: "PUT",
         }
-      ) as { data: TogglApiTimeEntry }
+      ) as { data: TogglAPITimeEntry }
       if (!response || !response.data) {
         throw new Error("Unexpected Toggl response!")
       }
@@ -129,7 +129,7 @@ const TogglApi = {
     }
 
     // Build a new entry
-    let timeEntry: TogglApiTimeEntry = { created_with: APP_NAME }
+    let timeEntry: TogglAPITimeEntry = { created_with: APP_NAME }
     if (state.entry) {
       timeEntry.description = state.entry
     }
@@ -138,14 +138,14 @@ const TogglApi = {
     }
 
     // Start a new time entry
-    const response = await TogglApi.fetch(
+    const response = await TogglAPI.fetch(
       "https://www.toggl.com/api/v8/time_entries/start",
       settings,
       {
         method: "POST",
         body: { "time_entry": timeEntry },
       }
-    ) as { data: TogglApiTimeEntry }
+    ) as { data: TogglAPITimeEntry }
     if (!response || !response.data) {
       throw new Error("Unexpected Toggl response!")
     }
@@ -163,10 +163,10 @@ const TogglApi = {
     }
   },
 
-  fetch: async function(url: string, settings: TogglApiSettings, opts = {}): Promise<Object> {
+  fetch: async function(url: string, settings: TogglAPISettings, opts = {}): Promise<Object> {
     const response = await fetch(url, Object.assign({
       method: "GET",
-      headers: TogglApi.getHeaders(settings),
+      headers: TogglAPI.getHeaders(settings),
     }, opts))
     if (response.ok) {
       const json = await response.json()
@@ -176,7 +176,7 @@ const TogglApi = {
     }
   },
 
-  getHeaders: function(settings: TogglApiSettings): Object {
+  getHeaders: function(settings: TogglAPISettings): Object {
     const hash = Buffer.from(settings.apiToken + ":api_token").toString('base64')
     return {
       "Authorization": `Basic ${hash}`,
@@ -185,4 +185,4 @@ const TogglApi = {
   },
 }
 
-export default TogglApi
+export default TogglAPI

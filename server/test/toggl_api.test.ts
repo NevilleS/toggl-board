@@ -1,7 +1,7 @@
-import TogglApi from "../src/toggl_api"
+import TogglAPI from "../src/toggl_api"
 declare const fetch: any
 
-describe("TogglApi", () => {
+describe("TogglAPI", () => {
   beforeEach(() => {
     fetch.resetMocks()
   })
@@ -48,7 +48,7 @@ describe("TogglApi", () => {
       const mockResponseData = { data: "test" }
       fetch.mockResponse(JSON.stringify(mockResponseData))
 
-      const response = await TogglApi.test(settings)
+      const response = await TogglAPI.test(settings)
       expect(fetch.mock.calls.length).toEqual(1)
       expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me")
       expect(fetch.mock.calls[0][1]).toEqual({
@@ -72,7 +72,7 @@ describe("TogglApi", () => {
           }
         }))
 
-        const response = await TogglApi.getCurrentState(settings)
+        const response = await TogglAPI.getCurrentState(settings)
         expect(fetch.mock.calls.length).toEqual(1)
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
         expect(response).toEqual({
@@ -103,7 +103,7 @@ describe("TogglApi", () => {
           }
         }))
 
-        const response = await TogglApi.getCurrentState(settings)
+        const response = await TogglAPI.getCurrentState(settings)
         expect(fetch.mock.calls.length).toEqual(1)
         expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
         expect(response).toEqual({
@@ -124,7 +124,7 @@ describe("TogglApi", () => {
           }
         }))
 
-        await expect(TogglApi.getCurrentState(settings)).rejects.toThrow("Unexpected Toggl response!")
+        await expect(TogglAPI.getCurrentState(settings)).rejects.toThrow("Unexpected Toggl response!")
       })
     })
   })
@@ -150,7 +150,7 @@ describe("TogglApi", () => {
       it("checks the current state and does nothing", async () => {
         fetch.mockResponse(JSON.stringify(currentResponseData))
 
-        const response = await TogglApi.setCurrentState({
+        const response = await TogglAPI.setCurrentState({
           entry: "Example Running Time Entry",
           projectId: 3,
         }, settings)
@@ -187,7 +187,7 @@ describe("TogglApi", () => {
           ],
         )
 
-        const response = await TogglApi.setCurrentState({
+        const response = await TogglAPI.setCurrentState({
           entry: "Testing new entry",
           projectId: 1,
         }, settings)
@@ -234,7 +234,7 @@ describe("TogglApi", () => {
           ],
         )
 
-        const response = await TogglApi.setCurrentState({
+        const response = await TogglAPI.setCurrentState({
           entry: null,
           projectId: null,
         }, settings)
@@ -271,7 +271,7 @@ describe("TogglApi", () => {
           ],
         )
 
-        const response = await TogglApi.setCurrentState({
+        const response = await TogglAPI.setCurrentState({
           entry: "Testing new entry",
           projectId: null,
         }, settings)
@@ -302,7 +302,7 @@ describe("TogglApi", () => {
     it("should return an error", async () => {
       fetch.mockResponse(null, { status: 403 })
 
-      await expect(TogglApi.test({
+      await expect(TogglAPI.test({
         apiToken: "invalidkey",
       })).rejects.toThrow("Connection to Toggl API failed!")
     })
