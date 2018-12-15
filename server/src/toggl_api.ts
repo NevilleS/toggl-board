@@ -168,7 +168,7 @@ const TogglAPI = {
       method: "GET",
       headers: TogglAPI.getHeaders(settings),
     }, opts))
-    if (response.ok) {
+    if (response && response.ok) {
       const json = await response.json()
       return json
     } else {

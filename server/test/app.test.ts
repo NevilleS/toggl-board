@@ -28,7 +28,7 @@ describe("app", () => {
       const response = await request(app).get("/test")
       expect(response.status).toEqual(200)
       expect(response.body).toEqual({ message: "Successfully connected to Toggl API", data: {} })
-      expect(TogglApi.test).toBeCalledWith({ apiToken: "your API token" })
+      expect(TogglApi.test).toBeCalledWith({ apiToken: "your Toggl API token" })
     })
   })
 
@@ -39,7 +39,7 @@ describe("app", () => {
       const response = await request(app).get("/current")
       expect(response.status).toEqual(200)
       expect(response.body).toEqual({ data: mockResponseData })
-      expect(TogglApi.getCurrentState).toBeCalledWith({ apiToken: "your API token" })
+      expect(TogglApi.getCurrentState).toBeCalledWith({ apiToken: "your Toggl API token" })
     })
   })
 })

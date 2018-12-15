@@ -62,10 +62,9 @@ int g_errorIntegral = 0;
 int g_numControlLoops = 0;
 int g_numStableControlLoops = 0;
 enum DeviceState {
-  STATE_CONTROL,
+  STATE_INIT,
   STATE_INPUT,
-  STATE_CALIBRATE,
-  STATE_INIT
+  STATE_CONTROL
 };
 DeviceState g_state = STATE_INIT;
 DeviceState g_prevState = STATE_INIT;
@@ -80,6 +79,7 @@ void setup() {
   Particle.variable("targetPosIdx", g_targetSlidePositionIndex);
   Particle.variable("actualPosIdx", g_actualSlidePositionIndex);
   Particle.variable("actualPosSen", g_actualSlidePositionSense);
+  Particle.variable("state", g_state);
   Log.info("REGISTER SPARK FUNCTION: setTargetPos");
   Particle.function("setTargetPos", setTargetPos);
 
@@ -125,9 +125,6 @@ void loop() {
       break;
     case (STATE_CONTROL):
       loopControl();
-      break;
-    case (STATE_CALIBRATE):
-      loopCalibrate();
       break;
     default:
       Log.error("loop(): invalid state %d", g_state);
@@ -286,11 +283,6 @@ void loopControl() {
 
 }
 
-void loopCalibrate() {
-  Log.error("loopCalibrate(): not implemented!");
-  g_state = STATE_INPUT;
-}
-
 // Translate the target slide position to a raw sensor value
 int getTargetSenseValue() {
   if (g_targetSlidePositionIndex < SLIDE_POSITION_MIN || g_targetSlidePositionIndex > SLIDE_POSITION_MAX) {
@@ -326,7 +318,6 @@ String getStateName(DeviceState state) {
   switch (g_state) {
     case (STATE_INPUT): return "STATE_INPUT";
     case (STATE_CONTROL): return "STATE_CONTROL";
-    case (STATE_CALIBRATE): return "STATE_CALIBRATE";
     case (STATE_INIT): return "STATE_INIT";
     default: return "UNKNOWN STATE";
   }

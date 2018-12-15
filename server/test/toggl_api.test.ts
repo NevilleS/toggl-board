@@ -60,6 +60,16 @@ describe("TogglAPI", () => {
       })
       expect(response).toEqual(mockResponseData)
     })
+
+    describe("when given invalid credentials", () => {
+      it("should return an error", async () => {
+        fetch.mockResponse(null, { status: 403 })
+
+        await expect(TogglAPI.test({
+          apiToken: "invalidkey",
+        })).rejects.toThrow("Connection to Toggl API failed!")
+      })
+    })
   })
 
   describe("getCurrentState()", () => {
@@ -295,16 +305,6 @@ describe("TogglAPI", () => {
           projectId: null,
         })
       })
-    })
-  })
-
-  describe("when given invalid credentials", () => {
-    it("should return an error", async () => {
-      fetch.mockResponse(null, { status: 403 })
-
-      await expect(TogglAPI.test({
-        apiToken: "invalidkey",
-      })).rejects.toThrow("Connection to Toggl API failed!")
     })
   })
 })
