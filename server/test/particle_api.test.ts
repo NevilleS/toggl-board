@@ -80,4 +80,11 @@ describe("ParticleAPI", () => {
       })
     })
   })
+
+  describe.skip("setCurrentState()", () => {
+    describe("when it does not match the current state", () => {
+      it("checks the current state and sets the new target position index", async () => {
+      })
+    })
+  })
 })

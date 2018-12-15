@@ -14,6 +14,10 @@ interface ParticleAPIState {
   targetPosIdx: number
 }
 
+interface ParticleAPINewState {
+  targetPosIdx: number
+}
+
 interface ParticleAPIVariable {
   name: string
   result: number
@@ -52,6 +56,11 @@ const ParticleAPI = {
       stateName: ParticleAPI.getStateName(state),
       targetPosIdx,
     }
+  },
+
+  setCurrentState: async function(state: ParticleAPINewState, settings: ParticleAPISettings): Promise<ParticleAPIState> {
+    // TODO: call setTargetPosIdx
+    return await ParticleAPI.getCurrentState(settings)
   },
 
   getVariable: async function(variableName: string, settings: ParticleAPISettings): Promise<number> {

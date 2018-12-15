@@ -52,47 +52,6 @@ const TogglAPI = {
     return false
   },
 
-  getCurrentUser: async function(settings: TogglAPISettings): Promise<TogglAPICurrentUser> {
-    // Get the current user data from Toggl
-    const response = await TogglAPI.fetch(
-      "https://www.toggl.com/api/v8/me?with_related_data=true",
-      settings
-    ) as { data: TogglAPICurrentUser }
-
-    // Ensure it has all the data we expect...
-    if (!response.data || !response.data.projects || !response.data.time_entries) {
-      throw new Error("Unexpected Toggl response!")
-    }
-    const projects = response.data.projects
-    const timeEntries = response.data.time_entries
-    if (!Array.isArray(projects) || !Array.isArray(timeEntries)) {
-      throw new Error("Unexpected Toggl response!")
-    }
-    return response.data
-  },
-
-  extractCurrentState(currentUser: TogglAPICurrentUser): TogglAPIState {
-    // Extract the current entry & project from the TogglAPI data
-    const currentEntry = currentUser.time_entries.find(entry => !!(entry.duration && entry.duration < 0))
-    if (!currentEntry) {
-      return {
-        entry: null,
-        entryId: null,
-        project: null,
-        projectId: null,
-      }
-    }
-
-    // Join against a matching project, if found
-    const currentProject = currentUser.projects.find(project => project.id == currentEntry.pid)
-    return {
-      entry: currentEntry.description || null,
-      entryId: currentEntry.id || null,
-      project: (currentProject && currentProject.name) || null,
-      projectId: (currentProject && currentProject.id) || null,
-    }
-  },
-
   getCurrentState: async function(settings: TogglAPISettings): Promise<TogglAPIState> {
     const currentUser = await TogglAPI.getCurrentUser(settings)
     return TogglAPI.extractCurrentState(currentUser)
@@ -166,6 +125,47 @@ const TogglAPI = {
       entryId: newEntry.id || null,
       project: (newProject && newProject.name) || null,
       projectId: (newProject && newProject.id) || null,
+    }
+  },
+
+  getCurrentUser: async function(settings: TogglAPISettings): Promise<TogglAPICurrentUser> {
+    // Get the current user data from Toggl
+    const response = await TogglAPI.fetch(
+      "https://www.toggl.com/api/v8/me?with_related_data=true",
+      settings
+    ) as { data: TogglAPICurrentUser }
+
+    // Ensure it has all the data we expect...
+    if (!response.data || !response.data.projects || !response.data.time_entries) {
+      throw new Error("Unexpected Toggl response!")
+    }
+    const projects = response.data.projects
+    const timeEntries = response.data.time_entries
+    if (!Array.isArray(projects) || !Array.isArray(timeEntries)) {
+      throw new Error("Unexpected Toggl response!")
+    }
+    return response.data
+  },
+
+  extractCurrentState(currentUser: TogglAPICurrentUser): TogglAPIState {
+    // Extract the current entry & project from the TogglAPI data
+    const currentEntry = currentUser.time_entries.find(entry => !!(entry.duration && entry.duration < 0))
+    if (!currentEntry) {
+      return {
+        entry: null,
+        entryId: null,
+        project: null,
+        projectId: null,
+      }
+    }
+
+    // Join against a matching project, if found
+    const currentProject = currentUser.projects.find(project => project.id == currentEntry.pid)
+    return {
+      entry: currentEntry.description || null,
+      entryId: currentEntry.id || null,
+      project: (currentProject && currentProject.name) || null,
+      projectId: (currentProject && currentProject.id) || null,
     }
   },
 
