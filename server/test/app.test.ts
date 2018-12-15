@@ -1,9 +1,11 @@
 jest.mock("../src/toggl_api")
+jest.mock("../src/particle_api")
 declare const fetch: any
 
 import * as request from "supertest"
 import app from "../src/app"
 import TogglApi from "../src/toggl_api"
+import ParticleApi from "../src/particle_api"
 
 describe("app", () => {
   describe("GET /invalid", () => {
@@ -17,29 +19,61 @@ describe("app", () => {
     it("should return {}", async () => {
       const response = await request(app).get("/ping")
       expect(response.status).toEqual(200)
-      expect(response.body).toEqual({})
+      expect(response.body).toEqual({ message: "pong", data: {} })
     })
   })
 
-  describe("GET /test", () => {
+  describe("GET /toggl/test", () => {
     it("should test Toggl API", async () => {
-      const mockResponseData = { message: "Successfully connected to Toggl API", data: {} }
-      ;(TogglApi.test as any).mockResolvedValue(mockResponseData)
-      const response = await request(app).get("/test")
+      ;(TogglApi.test as any).mockResolvedValue(true)
+      const response = await request(app).get("/toggl/test")
+      expect(TogglApi.test).toBeCalledWith({ token: "your Toggl API token" })
       expect(response.status).toEqual(200)
       expect(response.body).toEqual({ message: "Successfully connected to Toggl API", data: {} })
-      expect(TogglApi.test).toBeCalledWith({ apiToken: "your Toggl API token" })
     })
   })
 
-  describe("GET /current", () => {
+  describe("GET /toggl/current", () => {
     it("should return current Toggl API state", async () => {
       const mockResponseData = { entry: "Test Entry", entryId: 10, project: "Test Project", projectId: 1 }
       ;(TogglApi.getCurrentState as any).mockResolvedValue(mockResponseData)
-      const response = await request(app).get("/current")
+      const response = await request(app).get("/toggl/current")
+      expect(TogglApi.getCurrentState).toBeCalledWith({ token: "your Toggl API token" })
       expect(response.status).toEqual(200)
-      expect(response.body).toEqual({ data: mockResponseData })
-      expect(TogglApi.getCurrentState).toBeCalledWith({ apiToken: "your Toggl API token" })
+      expect(response.body).toEqual({ message: "OK", data: mockResponseData })
+    })
+  })
+
+  describe("GET /particle/test", () => {
+    it("should test Particle API", async () => {
+      const mockResponseData = { online: true, ok: true }
+      ;(ParticleApi.test as any).mockResolvedValue(mockResponseData)
+      const response = await request(app).get("/particle/test")
+      expect(ParticleApi.test).toBeCalledWith({
+        token: "your Particle access token",
+        deviceName: "your Particle device name",
+      })
+      expect(response.status).toEqual(200)
+      expect(response.body).toEqual({ message: "Successfully connected to Particle API", data: {} })
+    })
+  })
+
+  describe("GET /particle/current", () => {
+    it("should return current Particle API state", async () => {
+      const mockResponseData = {
+        actualPosIdx: 3,
+        actualPosSen: 1680,
+        stateName: "STATE_CONTROL",
+        targetPosIdx: 5,
+      }
+      ;(ParticleApi.getCurrentState as any).mockResolvedValue(mockResponseData)
+      const response = await request(app).get("/particle/current")
+      expect(ParticleApi.getCurrentState).toBeCalledWith({
+        token: "your Particle access token",
+        deviceName: "your Particle device name",
+      })
+      expect(response.status).toEqual(200)
+      expect(response.body).toEqual({ message: "OK", data: mockResponseData })
     })
   })
 })

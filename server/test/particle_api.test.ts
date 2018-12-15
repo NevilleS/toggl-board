@@ -8,15 +8,13 @@ describe("ParticleAPI", () => {
 
   // Some fixture data to use.
   const settings = {
-    apiToken: "particle123",
+    token: "particle123",
     deviceName: "my-particle-device",
   }
 
   describe("test()", () => {
     it("should connect to Particle API", async () => {
-      const mockResponseData = { online: true, ok: true }
-      fetch.mockResponse(JSON.stringify(mockResponseData))
-
+      fetch.mockResponse(JSON.stringify({ online: true, ok: true }))
       const response = await ParticleAPI.test(settings)
       expect(fetch.mock.calls.length).toEqual(1)
       expect(fetch.mock.calls[0][0]).toEqual("https://api.particle.io/v1/devices/my-particle-device/ping")
@@ -27,7 +25,7 @@ describe("ParticleAPI", () => {
           "Content-Type": "application/json",
         },
       })
-      expect(response).toEqual(mockResponseData)
+      expect(response).toEqual(true)
     })
 
     describe("when given invalid credentials", () => {
@@ -35,7 +33,7 @@ describe("ParticleAPI", () => {
         fetch.mockResponse(null, { status: 401 })
 
         await expect(ParticleAPI.test({
-          apiToken: "invalidkey",
+          token: "invalidkey",
           deviceName: "my-particle-device",
         })).rejects.toThrow("Connection to Particle API failed!")
       })

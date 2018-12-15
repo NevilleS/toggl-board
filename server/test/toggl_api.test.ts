@@ -8,7 +8,7 @@ describe("TogglAPI", () => {
 
   // Some fixture data to use.
   const settings = {
-    apiToken: "abc123",
+    token: "abc123",
   }
 
   const projectsFixture = [
@@ -45,9 +45,7 @@ describe("TogglAPI", () => {
 
   describe("test()", () => {
     it("should connect to Toggl API", async () => {
-      const mockResponseData = { data: "test" }
-      fetch.mockResponse(JSON.stringify(mockResponseData))
-
+      fetch.mockResponse(JSON.stringify({ data: "test" }))
       const response = await TogglAPI.test(settings)
       expect(fetch.mock.calls.length).toEqual(1)
       expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me")
@@ -58,7 +56,7 @@ describe("TogglAPI", () => {
           "Content-Type": "application/json",
         },
       })
-      expect(response).toEqual(mockResponseData)
+      expect(response).toEqual(true)
     })
 
     describe("when given invalid credentials", () => {
@@ -66,7 +64,7 @@ describe("TogglAPI", () => {
         fetch.mockResponse(null, { status: 403 })
 
         await expect(TogglAPI.test({
-          apiToken: "invalidkey",
+          token: "invalidkey",
         })).rejects.toThrow("Connection to Toggl API failed!")
       })
     })

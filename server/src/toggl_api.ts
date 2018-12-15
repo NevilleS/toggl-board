@@ -5,7 +5,7 @@ declare const fetch: any // NOTE: this offends my sensibilities
 const APP_NAME = "TogglBoard"
 
 interface TogglAPISettings {
-  apiToken: string
+  token: string
 }
 
 interface TogglAPIState {
@@ -41,9 +41,15 @@ interface TogglAPITimeEntry {
 }
 
 const TogglAPI = {
-  test: async function(settings: TogglAPISettings): Promise<Object> {
-    const response = await TogglAPI.fetch("https://www.toggl.com/api/v8/me", settings)
-    return response
+  test: async function(settings: TogglAPISettings): Promise<boolean> {
+    const response = await TogglAPI.fetch(
+      "https://www.toggl.com/api/v8/me",
+      settings
+    ) as { data: TogglAPICurrentUser }
+    if (response && response.data) {
+      return true
+    }
+    return false
   },
 
   getCurrentUser: async function(settings: TogglAPISettings): Promise<TogglAPICurrentUser> {
@@ -177,7 +183,7 @@ const TogglAPI = {
   },
 
   getHeaders: function(settings: TogglAPISettings): Object {
-    const hash = Buffer.from(settings.apiToken + ":api_token").toString('base64')
+    const hash = Buffer.from(settings.token + ":api_token").toString('base64')
     return {
       "Authorization": `Basic ${hash}`,
       "Content-Type": "application/json",

@@ -3,7 +3,7 @@ import { isEqual } from "lodash"
 declare const fetch: any // NOTE: this offends my sensibilities
 
 interface ParticleAPISettings {
-  apiToken: string
+  token: string
   deviceName: string
 }
 
@@ -27,15 +27,18 @@ interface ParticleAPIVariable {
 }
 
 const ParticleAPI = {
-  test: async function(settings: ParticleAPISettings): Promise<Object> {
+  test: async function(settings: ParticleAPISettings): Promise<boolean> {
     const response = await ParticleAPI.fetch(
       `https://api.particle.io/v1/devices/${settings.deviceName}/ping`,
       settings,
       {
         method: "PUT",
       }
-    )
-    return response
+    ) as any
+    if (response && response.online) {
+      return true
+    }
+    return false
   },
 
   getCurrentState: async function(settings: ParticleAPISettings): Promise<ParticleAPIState> {
@@ -89,7 +92,7 @@ const ParticleAPI = {
 
   getHeaders: function(settings: ParticleAPISettings): Object {
     return {
-      "Authorization": `Bearer ${settings.apiToken}`,
+      "Authorization": `Bearer ${settings.token}`,
       "Content-Type": "application/json",
     }
   },
