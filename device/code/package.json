@@ -9,7 +9,8 @@
     "particle": "particle",
     "build": "npm run compile",
     "compile": "particle compile core toggl-board-device.ino",
-    "flash": "particle flash <DEVICE NAME> toggl-board-device.ino"
+    "flash": "particle flash $npm_package_config_device_name toggl-board-device.ino",
+    "clean": "rm *.bin"
   },
   "repository": {
     "type": "git",
@@ -24,5 +25,8 @@
   "dependencies": {},
   "devDependencies": {
     "particle-cli": "^1.35.2"
+  },
+  "config": {
+    "device_name": "ns-core-1"
   }
 }

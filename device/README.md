@@ -16,12 +16,13 @@ This folder contains the design files for the TogglBoard Device with the physica
 | U5         | SLIDE POT + MOTOR | 1        |
 | U6         | MC74HC595ANG      | 1        |
 | SW1        | SPST SWITCH       | 1        |
-| LED1-9     | LED-10MM          | 9        |
-| LED10-12   | LED-3MM           | 3        |
-| R1-12      | 60                | 12       |
+| LED1-8     | LED-10MM          | 8        |
+| LED9-11    | LED-3MM           | 3        |
+| R1-11      | 60                | 11       |
+| R12        | 10k               | 1        |
+| R13        | 1M                | 1        |
 | C1         | 100n              | 1        |
 | C2         | 10u               | 1        |
-| R13        | 1M                | 1        |
 
 ## Microcontroller Code
 
