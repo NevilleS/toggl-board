@@ -8,14 +8,14 @@ interface TogglApiSettings {
   apiToken: string
 }
 
-interface TogglBoardState {
+interface TogglApiState {
   entry: string | null
   entryId: number | null
   project: string | null
   projectId: number | null
 }
 
-interface TogglBoardNewState {
+interface TogglApiNewState {
   entry: string | null
   projectId: number | null
 }
@@ -65,7 +65,7 @@ const TogglApi = {
     return response.data
   },
 
-  extractCurrentState(currentUser: TogglApiCurrentUser): TogglBoardState {
+  extractCurrentState(currentUser: TogglApiCurrentUser): TogglApiState {
     // Extract the current entry & project from the TogglApi data
     const currentEntry = currentUser.time_entries.find(entry => !!(entry.duration && entry.duration < 0))
     if (!currentEntry) {
@@ -87,15 +87,15 @@ const TogglApi = {
     }
   },
 
-  getCurrentState: async function(settings: TogglApiSettings): Promise<TogglBoardState> {
+  getCurrentState: async function(settings: TogglApiSettings): Promise<TogglApiState> {
     const currentUser = await TogglApi.getCurrentUser(settings)
     return TogglApi.extractCurrentState(currentUser)
   },
 
-  setCurrentState: async function(state: TogglBoardNewState, settings: TogglApiSettings): Promise<TogglBoardState> {
+  setCurrentState: async function(state: TogglApiNewState, settings: TogglApiSettings): Promise<TogglApiState> {
     // Ensure the new state is valid
     if (!state) {
-      throw new Error("Invalid TogglBoardNewState specified!")
+      throw new Error("Invalid TogglApiNewState specified!")
     }
 
     // Get the current state from Toggl
