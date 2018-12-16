@@ -1,6 +1,6 @@
 import * as express from "express"
-import TogglApi from "./toggl_api"
-import ParticleApi from "./particle_api"
+import TogglAPI from "./toggl_api"
+import ParticleAPI from "./particle_api"
 
 interface APIResponse {
   message: string
@@ -54,7 +54,7 @@ app.get("/ping", function ping(req, res) {
 app.get("/toggl/test", async function test(req, res) {
   const config = getAppConfig()
   try {
-    const connected = await TogglApi.test({ token: config.toggl.token })
+    const connected = await TogglAPI.test({ token: config.toggl.token })
     if (connected) {
       res.send({ message: "Successfully connected to Toggl API", data: {} })
       return
@@ -68,7 +68,7 @@ app.get("/toggl/test", async function test(req, res) {
 app.get("/toggl/current", async function current(req, res) {
   const config = getAppConfig()
   try {
-    const response = await TogglApi.getCurrentState({ token: config.toggl.token })
+    const response = await TogglAPI.getCurrentState({ token: config.toggl.token })
     res.send({
       message: "OK",
       data: response,
@@ -83,7 +83,7 @@ app.get("/toggl/current", async function current(req, res) {
 app.get("/particle/test", async function test(req, res) {
   const config = getAppConfig()
   try {
-    const connected = await ParticleApi.test({
+    const connected = await ParticleAPI.test({
       token: config.particle.token,
       deviceName: config.particle.deviceName,
     })
@@ -100,7 +100,7 @@ app.get("/particle/test", async function test(req, res) {
 app.get("/particle/current", async function current(req, res) {
   const config = getAppConfig()
   try {
-    const response = await ParticleApi.getCurrentState({
+    const response = await ParticleAPI.getCurrentState({
       token: config.particle.token,
       deviceName: config.particle.deviceName,
     })

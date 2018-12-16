@@ -53,7 +53,7 @@ SerialLogHandler logHandler;
 //SerialLogHandler logHandler(LOG_LEVEL_TRACE);
 
 // State variables
-int g_targetSlidePositionIndex = 0;  // target position index 0 - 7
+int g_targetSlidePositionIndex = -1;  // target position index 0 - 7
 int g_actualSlidePositionIndex = 0;
 int g_actualSlidePositionSense = 0;
 unsigned long g_prevLoopTimeMillis = 0;
@@ -255,6 +255,7 @@ void loopControl() {
     g_numStableControlLoops += 1;
     if (g_numStableControlLoops >= CONTROL_NUM_LOOPS_STABLE) {
       Log.info("loopControl(): achieved target in %d loops, exiting!", g_numControlLoops);
+      g_targetSlidePositionIndex = -1;
       g_state = STATE_INPUT;
       resetControllerState();
       return;
@@ -266,6 +267,7 @@ void loopControl() {
   // Exit control state
   if (g_numControlLoops > CONTROL_NUM_LOOPS_MAX) {
     Log.error("loopControl(): reached maximum control loops %d, giving up!", CONTROL_NUM_LOOPS_MAX);
+    g_targetSlidePositionIndex = -1;
     g_state = STATE_INPUT;
     resetControllerState();
     return;

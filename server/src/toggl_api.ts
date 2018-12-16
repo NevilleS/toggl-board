@@ -1,21 +1,21 @@
 import "isomorphic-fetch"
-import { isEqual } from "lodash"
+import { has } from "lodash"
 declare const fetch: any // NOTE: this offends my sensibilities
 
 const APP_NAME = "TogglBoard"
 
-interface TogglAPISettings {
+export interface TogglAPISettings {
   token: string
 }
 
-interface TogglAPIState {
+export interface TogglAPIState {
   entry: string | null
   entryId: number | null
   project: string | null
   projectId: number | null
 }
 
-interface TogglAPINewState {
+export interface TogglAPINewState {
   entry: string | null
   projectId: number | null
 }
@@ -46,7 +46,7 @@ const TogglAPI = {
       "https://www.toggl.com/api/v8/me",
       settings
     ) as { data: TogglAPICurrentUser }
-    if (response && response.data) {
+    if (response && has(response, "data")) {
       return true
     }
     return false
@@ -82,7 +82,7 @@ const TogglAPI = {
           method: "PUT",
         }
       ) as { data: TogglAPITimeEntry }
-      if (!response || !response.data) {
+      if (!response || !has(response, "data")) {
         throw new Error("Unexpected Toggl response!")
       }
       return {
@@ -111,7 +111,7 @@ const TogglAPI = {
         body: { "time_entry": timeEntry },
       }
     ) as { data: TogglAPITimeEntry }
-    if (!response || !response.data) {
+    if (!response || !has(response, "data")) {
       throw new Error("Unexpected Toggl response!")
     }
 
@@ -136,7 +136,7 @@ const TogglAPI = {
     ) as { data: TogglAPICurrentUser }
 
     // Ensure it has all the data we expect...
-    if (!response.data || !response.data.projects || !response.data.time_entries) {
+    if (!has(response, "data") || !has(response.data, "projects") || !has(response.data, "time_entries")) {
       throw new Error("Unexpected Toggl response!")
     }
     const projects = response.data.projects

@@ -81,9 +81,31 @@ describe("ParticleAPI", () => {
     })
   })
 
-  describe.skip("setCurrentState()", () => {
-    describe("when it does not match the current state", () => {
-      it("checks the current state and sets the new target position index", async () => {
+  describe("setCurrentState()", () => {
+    it("sets the new target position index", async () => {
+      fetch.mockResponse(JSON.stringify({ name: settings.deviceName, return_value: 0 }))
+      const response = await ParticleAPI.setCurrentState({ targetPosIdx: 2 }, settings)
+      expect(fetch.mock.calls.length).toEqual(1)
+      expect(fetch.mock.calls[0][0]).toEqual("https://api.particle.io/v1/devices/my-particle-device/setTargetPos")
+      expect(fetch.mock.calls[0][1]).toMatchObject({
+        method: "POST",
+        body: expect.objectContaining({ "arg": 2 })
+      })
+      expect(response).toBe(true)
+    })
+
+    describe("when the device returns an error", () => {
+      it("should return false", async () => {
+        fetch.mockResponse(JSON.stringify({ name: settings.deviceName, return_value: -1 }))
+        const response = await ParticleAPI.setCurrentState({ targetPosIdx: 2 }, settings)
+        expect(response).toBe(false)
+      })
+    })
+
+    describe("when receiving an unexpected response", () => {
+      it("should throw an error", async () => {
+        fetch.mockResponse(JSON.stringify({}))
+        await expect(ParticleAPI.setCurrentState({ targetPosIdx: 2 }, settings)).rejects.toThrow("Unexpected Particle response!")
       })
     })
   })

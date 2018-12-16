@@ -1,20 +1,20 @@
 import "isomorphic-fetch"
-import { isEqual } from "lodash"
+import { has } from "lodash"
 declare const fetch: any // NOTE: this offends my sensibilities
 
-interface ParticleAPISettings {
+export interface ParticleAPISettings {
   token: string
   deviceName: string
 }
 
-interface ParticleAPIState {
+export interface ParticleAPIState {
   actualPosIdx: number
   actualPosSen: number
   stateName: "STATE_INIT" | "STATE_INPUT" | "STATE_CONTROL"
   targetPosIdx: number
 }
 
-interface ParticleAPINewState {
+export interface ParticleAPINewState {
   targetPosIdx: number
 }
 
@@ -58,9 +58,19 @@ const ParticleAPI = {
     }
   },
 
-  setCurrentState: async function(state: ParticleAPINewState, settings: ParticleAPISettings): Promise<ParticleAPIState> {
-    // TODO: call setTargetPosIdx
-    return await ParticleAPI.getCurrentState(settings)
+  setCurrentState: async function(state: ParticleAPINewState, settings: ParticleAPISettings): Promise<boolean> {
+    const response = await ParticleAPI.fetch(
+      `https://api.particle.io/v1/devices/${settings.deviceName}/setTargetPos`,
+      settings,
+      {
+        method: "POST",
+        body: { arg: state.targetPosIdx },
+      }
+    ) as any
+    if (!response || !has(response, "return_value")) {
+      throw new Error("Unexpected Particle response!")
+    }
+    return !!(response.return_value == 0)
   },
 
   getVariable: async function(variableName: string, settings: ParticleAPISettings): Promise<number> {
@@ -69,7 +79,7 @@ const ParticleAPI = {
     if (response && (response as any).error == "Timed out.") {
       throw new Error("Particle device timed out!")
     }
-    if (!response || !response.name || !response.result || response.name != variableName) {
+    if (!response || !has(response, "name") || !has(response, "result") || response.name != variableName) {
       throw new Error("Unexpected Particle response!")
     }
     return response.result

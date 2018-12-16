@@ -4,8 +4,8 @@ declare const fetch: any
 
 import * as request from "supertest"
 import app from "../src/app"
-import TogglApi from "../src/toggl_api"
-import ParticleApi from "../src/particle_api"
+import TogglAPI from "../src/toggl_api"
+import ParticleAPI from "../src/particle_api"
 
 describe("app", () => {
   describe("GET /invalid", () => {
@@ -25,9 +25,9 @@ describe("app", () => {
 
   describe("GET /toggl/test", () => {
     it("should test Toggl API", async () => {
-      ;(TogglApi.test as any).mockResolvedValue(true)
+      ;(TogglAPI.test as any).mockResolvedValue(true)
       const response = await request(app).get("/toggl/test")
-      expect(TogglApi.test).toBeCalledWith({ token: "your Toggl API token" })
+      expect(TogglAPI.test).toBeCalledWith({ token: "your Toggl API token" })
       expect(response.status).toEqual(200)
       expect(response.body).toEqual({ message: "Successfully connected to Toggl API", data: {} })
     })
@@ -36,9 +36,9 @@ describe("app", () => {
   describe("GET /toggl/current", () => {
     it("should return current Toggl API state", async () => {
       const mockResponseData = { entry: "Test Entry", entryId: 10, project: "Test Project", projectId: 1 }
-      ;(TogglApi.getCurrentState as any).mockResolvedValue(mockResponseData)
+      ;(TogglAPI.getCurrentState as any).mockResolvedValue(mockResponseData)
       const response = await request(app).get("/toggl/current")
-      expect(TogglApi.getCurrentState).toBeCalledWith({ token: "your Toggl API token" })
+      expect(TogglAPI.getCurrentState).toBeCalledWith({ token: "your Toggl API token" })
       expect(response.status).toEqual(200)
       expect(response.body).toEqual({ message: "OK", data: mockResponseData })
     })
@@ -47,9 +47,9 @@ describe("app", () => {
   describe("GET /particle/test", () => {
     it("should test Particle API", async () => {
       const mockResponseData = { online: true, ok: true }
-      ;(ParticleApi.test as any).mockResolvedValue(mockResponseData)
+      ;(ParticleAPI.test as any).mockResolvedValue(mockResponseData)
       const response = await request(app).get("/particle/test")
-      expect(ParticleApi.test).toBeCalledWith({
+      expect(ParticleAPI.test).toBeCalledWith({
         token: "your Particle access token",
         deviceName: "your Particle device name",
       })
@@ -66,9 +66,9 @@ describe("app", () => {
         stateName: "STATE_CONTROL",
         targetPosIdx: 5,
       }
-      ;(ParticleApi.getCurrentState as any).mockResolvedValue(mockResponseData)
+      ;(ParticleAPI.getCurrentState as any).mockResolvedValue(mockResponseData)
       const response = await request(app).get("/particle/current")
-      expect(ParticleApi.getCurrentState).toBeCalledWith({
+      expect(ParticleAPI.getCurrentState).toBeCalledWith({
         token: "your Particle access token",
         deviceName: "your Particle device name",
       })
