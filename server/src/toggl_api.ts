@@ -16,7 +16,7 @@ export interface TogglAPIState {
 }
 
 export interface TogglAPINewState {
-  entry: string | null
+  entry?: string | null
   projectId: number | null
 }
 
