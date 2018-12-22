@@ -24,7 +24,7 @@ int CONTROL_NUM_LOOPS_MAX = 1000; // after N control loops, give up and return t
 int CONTROL_NUM_LOOPS_STABLE = 5; // after N control loops within the target range, end control loop
 int CONTROL_OUTPUT_MAX = 255; // limit the maximum output sent to motor (safety first!)
 float CONTROL_KP = 0.2; // controller gain for proportional error
-float CONTROL_KI = 2.0; // controller gain for integral error
+float CONTROL_KI = 1.0; // controller gain for integral error
 float CONTROL_KD = 0.005; // controller gain for derivative error
 
 // Configure pinout
@@ -79,7 +79,6 @@ void setup() {
   Particle.variable("targetPosIdx", g_targetSlidePositionIndex);
   Particle.variable("actualPosIdx", g_actualSlidePositionIndex);
   Particle.variable("actualPosSen", g_actualSlidePositionSense);
-  Particle.variable("state", g_state);
   Log.info("REGISTER SPARK FUNCTION: setTargetPos");
   Particle.function("setTargetPos", setTargetPos);
 
@@ -96,7 +95,7 @@ void setup() {
   pinMode(PIN_SHIFT_SHIFT, OUTPUT);
   pinMode(PIN_SHIFT_RESET, OUTPUT);
   digitalWrite(PIN_SHIFT_RESET, HIGH);
-  setProjectLEDs(-1);
+  setProjectLEDs(-1); // TODO: actually default to pos 0 and start in control state
 
   // Setup state
   Log.info("PUBLISH SPARK EVENT: togglDeviceOn");
@@ -162,6 +161,8 @@ void loopInput() {
   // If we match a position, check to see when it changes
   if (index >= SLIDE_POSITION_MIN && index <= SLIDE_POSITION_MAX) {
     if (g_actualSlidePositionIndex != index) {
+      // TODO: don't publish this immediately; update the lights "temporarily", have them pulse
+      // until "locked" in, etc.
       Log.info("loopInput(): input index change %d -> %d", g_actualSlidePositionIndex, index);
       Log.info("PUBLISH SPARK EVENT: togglDeviceActualPosIdxChange");
       Particle.publish("togglDeviceActualPosIdxChange", String(index), 60, PRIVATE);
