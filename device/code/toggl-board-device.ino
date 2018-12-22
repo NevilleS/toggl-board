@@ -2,7 +2,6 @@
 const char* VERSION = "0.1";
 int SLIDE_POSITION_MAX = 7;
 int SLIDE_POSITION_MIN = 0;
-// TODO: allow calibration of these points
 int SLIDE_POSITION_POINTS[] = {
   0,
   410,
@@ -14,7 +13,6 @@ int SLIDE_POSITION_POINTS[] = {
   4094,
 };
 int SLIDE_POSITION_SLOP = 100; // +/- sensor val range to match a point
-int SLIDE_POSITION_DELTA_MAX = 4095; // maximum allowable change in sensor value per loop
 unsigned long LOOP_DELAY_MS = 1; // delay to slow down speed of the main loop
 unsigned long CONTROL_DELTA_TIME_MIN = 1; // max control loop speed (in millis)
 int CONTROL_ERROR_INTEGRAL_MAX = 100000; // max value the integral error can be per loop
@@ -95,12 +93,13 @@ void setup() {
   pinMode(PIN_SHIFT_SHIFT, OUTPUT);
   pinMode(PIN_SHIFT_RESET, OUTPUT);
   digitalWrite(PIN_SHIFT_RESET, HIGH);
-  setProjectLEDs(-1); // TODO: actually default to pos 0 and start in control state
+  setProjectLEDs(-1);
 
-  // Setup state
+  // Setup state & control to position 0
   Log.info("PUBLISH SPARK EVENT: togglDeviceOn");
   Particle.publish("togglDeviceOn", NULL, 60, PRIVATE);
-  g_state = STATE_INPUT;
+  g_targetSlidePositionIndex = 0;
+  g_state = STATE_CONTROL;
   g_prevLoopTimeMillis = millis();
 }
 
@@ -138,13 +137,7 @@ void loop() {
 }
 
 void updateSenseValues() {
-  // Smooth out sense value using a maximum delta
-  int newSense = analogRead(PIN_SLIDE_POSITION_SENSE); // analogRead range: 0-4095
-  int deltaSense = newSense - g_actualSlidePositionSense;
-  if (deltaSense > SLIDE_POSITION_DELTA_MAX) {
-    deltaSense = SLIDE_POSITION_DELTA_MAX;
-  }
-  g_actualSlidePositionSense += deltaSense;
+  g_actualSlidePositionSense = analogRead(PIN_SLIDE_POSITION_SENSE); // analogRead range: 0-4095
 }
 
 void loopInput() {
