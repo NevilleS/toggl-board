@@ -1,6 +1,8 @@
-import "isomorphic-fetch"
+import * as Debug from "debug"
 import { has } from "lodash"
+import "isomorphic-fetch"
 declare const fetch: any // NOTE: this offends my sensibilities
+const debug = Debug("toggl-api")
 
 const APP_NAME = "TogglBoard"
 
@@ -108,7 +110,7 @@ const TogglAPI = {
       settings,
       {
         method: "POST",
-        body: { "time_entry": timeEntry },
+        body: JSON.stringify({ "time_entry": timeEntry }),
       }
     ) as { data: TogglAPITimeEntry }
     if (!response || !has(response, "data")) {
@@ -169,15 +171,23 @@ const TogglAPI = {
     }
   },
 
+  // TODO: extract into shared API helpers
   fetch: async function(url: string, settings: TogglAPISettings, opts = {}): Promise<Object> {
-    const response = await fetch(url, Object.assign({
+    const fetchOpts: any = Object.assign({
       method: "GET",
-      headers: TogglAPI.getHeaders(settings),
-    }, opts))
+      headers: TogglAPI.getHeaders(settings)
+    }, opts)
+    debug("fetch request: %s %s (%o)", fetchOpts.method, url, fetchOpts.body)
+    const response = await fetch(url, fetchOpts)
     if (response && response.ok) {
       const json = await response.json()
+      debug("fetch response: HTTP %s (%o)", response.status, json)
       return json
     } else {
+      if (response && response.hasBody) {
+        var text = await response.text()
+      }
+      debug("fetch error: HTTP %s (%s)", response.status, text)
       throw new Error("Connection to Toggl API failed!")
     }
   },

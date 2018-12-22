@@ -205,11 +205,11 @@ describe("TogglAPI", () => {
         expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries/start")
         expect(fetch.mock.calls[1][1]).toMatchObject({
           method: "POST",
-          body: expect.objectContaining({
+          body: JSON.stringify({
             "time_entry": {
+              "created_with": "TogglBoard",
               "description": "Testing new entry",
               "pid": 1,
-              "created_with": "TogglBoard",
             }
           })
         })
@@ -289,10 +289,10 @@ describe("TogglAPI", () => {
         expect(fetch.mock.calls[1][0]).toEqual("https://www.toggl.com/api/v8/time_entries/start")
         expect(fetch.mock.calls[1][1]).toMatchObject({
           method: "POST",
-          body: expect.objectContaining({
+          body: JSON.stringify({
             "time_entry": {
-              "description": "Testing new entry",
               "created_with": "TogglBoard",
+              "description": "Testing new entry",
             }
           })
         })

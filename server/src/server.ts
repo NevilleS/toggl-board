@@ -2,12 +2,13 @@
 import * as dotenv from "dotenv"
 dotenv.config({ path: ".env" });
 
-import app from "./app"
+import App from "./app"
 import * as dedent from "dedent"
 
 /**
  * Start Express server.
  */
+const app = App()
 const server = app.listen(app.get("port"), () => {
   console.log(
     "***********************************************************\n" +
@@ -24,6 +25,7 @@ const server = app.listen(app.get("port"), () => {
       DEBUG=${process.env.DEBUG}
       PORT=${process.env.PORT}
       TOGGL_API_TOKEN=${process.env.TOGGL_API_TOKEN}
+      TOGGL_PROJECT_IDS=${process.env.TOGGL_PROJECT_IDS}
       PARTICLE_API_TOKEN=${process.env.PARTICLE_API_TOKEN}
       PARTICLE_DEVICE_NAME=${process.env.PARTICLE_DEVICE_NAME}
   `)

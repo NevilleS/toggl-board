@@ -1,6 +1,8 @@
-import "isomorphic-fetch"
+import * as Debug from "debug"
 import { has } from "lodash"
+import "isomorphic-fetch"
 declare const fetch: any // NOTE: this offends my sensibilities
+const debug = Debug("particle-api")
 
 export interface ParticleAPISettings {
   token: string
@@ -10,7 +12,6 @@ export interface ParticleAPISettings {
 export interface ParticleAPIState {
   actualPosIdx: number
   actualPosSen: number
-  stateName: "STATE_INIT" | "STATE_INPUT" | "STATE_CONTROL"
   targetPosIdx: number
 }
 
@@ -48,12 +49,10 @@ const ParticleAPI = {
   getCurrentState: async function(settings: ParticleAPISettings): Promise<ParticleAPIState> {
     const actualPosIdx = await ParticleAPI.getVariable("actualPosIdx", settings)
     const actualPosSen = await ParticleAPI.getVariable("actualPosSen", settings)
-    const state = await ParticleAPI.getVariable("state", settings)
     const targetPosIdx = await ParticleAPI.getVariable("targetPosIdx", settings)
     return {
       actualPosIdx,
       actualPosSen,
-      stateName: ParticleAPI.getStateName(state),
       targetPosIdx,
     }
   },
@@ -64,7 +63,7 @@ const ParticleAPI = {
       settings,
       {
         method: "POST",
-        body: { arg: state.targetPosIdx },
+        body: JSON.stringify({ arg: state.targetPosIdx.toString() }),
       }
     ) as any
     if (!response || !has(response, "return_value")) {
@@ -85,26 +84,23 @@ const ParticleAPI = {
     return response.result
   },
 
-  // TODO: verify this is how the Particle enums work
-  getStateName: function(state: number) {
-    switch(state) {
-      case 0: return "STATE_INIT"
-      case 1: return "STATE_INPUT"
-      case 2: return "STATE_CONTROL"
-      default: throw new Error("Unexpected Particle response!")
-    }
-  },
-
   // TODO: extract into shared API helpers
   fetch: async function(url: string, settings: ParticleAPISettings, opts = {}): Promise<Object> {
-    const response = await fetch(url, Object.assign({
+    const fetchOpts: any = Object.assign({
       method: "GET",
-      headers: ParticleAPI.getHeaders(settings),
-    }, opts))
+      headers: ParticleAPI.getHeaders(settings)
+    }, opts)
+    debug("fetch request: %s %s (%o)", fetchOpts.method, url, fetchOpts.body)
+    const response = await fetch(url, fetchOpts)
     if (response && response.ok) {
       const json = await response.json()
+      debug("fetch response: HTTP %s (%o)", response.status, json)
       return json
     } else {
+      if (response && response.hasBody) {
+        var text = await response.text()
+      }
+      debug("fetch error: HTTP %s (%s)", response.status, text)
       throw new Error("Connection to Particle API failed!")
     }
   },

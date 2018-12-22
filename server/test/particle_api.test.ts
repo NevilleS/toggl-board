@@ -45,20 +45,17 @@ describe("ParticleAPI", () => {
       fetch.mockResponses(
         [ JSON.stringify({ name: "actualPosIdx", result: 3 }), { status: 200 }],
         [ JSON.stringify({ name: "actualPosSen", result: 1680 }), { status: 200 }],
-        [ JSON.stringify({ name: "state", result: 2 }), { status: 200 }],
         [ JSON.stringify({ name: "targetPosIdx", result: 5 }), { status: 200 }],
       )
 
       const response = await ParticleAPI.getCurrentState(settings)
-      expect(fetch.mock.calls.length).toEqual(4)
+      expect(fetch.mock.calls.length).toEqual(3)
       expect(fetch.mock.calls[0][0]).toEqual("https://api.particle.io/v1/devices/my-particle-device/actualPosIdx")
       expect(fetch.mock.calls[1][0]).toEqual("https://api.particle.io/v1/devices/my-particle-device/actualPosSen")
-      expect(fetch.mock.calls[2][0]).toEqual("https://api.particle.io/v1/devices/my-particle-device/state")
-      expect(fetch.mock.calls[3][0]).toEqual("https://api.particle.io/v1/devices/my-particle-device/targetPosIdx")
+      expect(fetch.mock.calls[2][0]).toEqual("https://api.particle.io/v1/devices/my-particle-device/targetPosIdx")
       expect(response).toEqual({
         actualPosIdx: 3,
         actualPosSen: 1680,
-        stateName: "STATE_CONTROL",
         targetPosIdx: 5,
       })
     })
@@ -89,7 +86,7 @@ describe("ParticleAPI", () => {
       expect(fetch.mock.calls[0][0]).toEqual("https://api.particle.io/v1/devices/my-particle-device/setTargetPos")
       expect(fetch.mock.calls[0][1]).toMatchObject({
         method: "POST",
-        body: expect.objectContaining({ "arg": 2 })
+        body: JSON.stringify({ "arg": "2" }),
       })
       expect(response).toBe(true)
     })

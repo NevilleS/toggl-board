@@ -1,29 +1,59 @@
-import { TogglAPIState, TogglAPINewState } from "./toggl_api"
-import { ParticleAPIState, ParticleAPINewState } from "./particle_api"
+import * as Debug from "debug"
 import { has } from "lodash"
+import TogglAPI, { TogglAPIState, TogglAPINewState, TogglAPISettings } from "./toggl_api"
+import ParticleAPI, { ParticleAPIState, ParticleAPINewState, ParticleAPISettings } from "./particle_api"
+const debug = Debug("toggl-board")
 
 const NUM_TOGGL_BOARD_PROJECTS = 7
 
 export interface TogglBoardState {
   toggl: TogglAPIState
   particle: ParticleAPIState
+}
+
+export interface TogglBoardSettings {
+  toggl: TogglAPISettings
+  particle: ParticleAPISettings
   togglProjectIDs: number[]
 }
 
 type TogglBoardAction = TogglAPINewState | ParticleAPINewState | null
 
 const TogglBoard = {
-  calculateAction: function(current: TogglBoardState, previous?: TogglBoardState): TogglBoardAction {
+  sync: async function(previous: TogglBoardState | null, settings: TogglBoardSettings): Promise<TogglBoardState> {
+    // Get the new state of both APIs
+    const toggl = await TogglAPI.getCurrentState(settings.toggl)
+    const particle = await ParticleAPI.getCurrentState(settings.particle)
+    const current = { toggl, particle }
+
+    // Calculate the action to take
+    const action = TogglBoard.calculateAction(current, previous, settings)
+    debug("sync action: %o", action)
+
+    // Apply the action
+    if (action && has(action, "projectId")) {
+      const newTogglState = action as TogglAPINewState
+      await TogglAPI.setCurrentState(newTogglState, settings.toggl)
+    } else if (action && has(action, "targetPosIdx")) {
+      const newParticleState = action as ParticleAPINewState
+      await ParticleAPI.setCurrentState(newParticleState, settings.particle)
+    }
+
+    // Return the current state
+    return current
+  },
+
+  calculateAction: function(current: TogglBoardState, previous: TogglBoardState | null, settings: TogglBoardSettings): TogglBoardAction {
     // Some runtime checks
     const projectId = current.toggl.projectId
     const actualPosIdx = current.particle.actualPosIdx
     const targetPosIdx = current.particle.targetPosIdx
-    if (!TogglBoard.validateState(current)) {
+    if (!TogglBoard.validateState(current, settings)) {
        return null
     }
 
     // Convert the Toggl project to a Particle position index
-    let projectIdx = TogglBoard.lookupProjectIndex(projectId, current.togglProjectIDs)
+    let projectIdx = TogglBoard.lookupProjectIndex(projectId, settings.togglProjectIDs)
     if (projectIdx < 0 || projectIdx >= NUM_TOGGL_BOARD_PROJECTS) {
       projectIdx = 0
     } else {
@@ -49,14 +79,14 @@ const TogglBoard = {
       if (actualPosIdx == 0) {
         return { projectId: null }
       } else {
-        return { projectId: current.togglProjectIDs[actualPosIdx - 1] }
+        return { projectId: settings.togglProjectIDs[actualPosIdx - 1] }
       }
     }
     return null
   },
 
-  validateState: function(state: TogglBoardState): boolean {
-    if (!state || !has(state, "toggl") || !has(state, "particle") || !has(state, "togglProjectIDs")) {
+  validateState: function(state: TogglBoardState, settings: TogglBoardSettings): boolean {
+    if (!state || !has(state, "toggl") || !has(state, "particle") || !has(settings, "togglProjectIDs")) {
       return false
     }
     if (!has(state.toggl, "projectId")) {
@@ -65,7 +95,7 @@ const TogglBoard = {
     if (!has(state.particle, "actualPosIdx") || state.particle.actualPosIdx == null) {
       return false
     }
-    if (!Array.isArray(state.togglProjectIDs) || state.togglProjectIDs.length != NUM_TOGGL_BOARD_PROJECTS) {
+    if (!Array.isArray(settings.togglProjectIDs) || settings.togglProjectIDs.length != NUM_TOGGL_BOARD_PROJECTS) {
       return false
     }
     return true
