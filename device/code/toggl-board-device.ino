@@ -1,5 +1,6 @@
-// Constants
-const char* VERSION = "0.1";
+// Overall Constants
+const char* VERSION = "0.9";
+unsigned long LOOP_DELAY_MS = 1; // delay to slow down speed of the main loop
 int SLIDE_POSITION_MAX = 7;
 int SLIDE_POSITION_MIN = 0;
 int SLIDE_POSITION_POINTS[] = {
@@ -12,18 +13,23 @@ int SLIDE_POSITION_POINTS[] = {
   3600,
   4094,
 };
-int SLIDE_POSITION_SLOP = 100; // +/- sensor val range to match a point
-unsigned long LOOP_DELAY_MS = 1; // delay to slow down speed of the main loop
-unsigned long CONTROL_DELTA_TIME_MIN = 1; // max control loop speed (in millis)
-int CONTROL_ERROR_INTEGRAL_MAX = 100000; // max value the integral error can be per loop
+
+// STATE_CONTROL constants
+float CONTROL_KD = 0.005; // controller gain for derivative error
+float CONTROL_KI = 1.0; // controller gain for integral error
+float CONTROL_KP = 0.2; // controller gain for proportional error
 int CONTROL_ERROR_DELTA_MAX = 100000; // max value the delta error can be per loop
+int CONTROL_ERROR_INTEGRAL_MAX = 100000; // max value the integral error can be per loop
 int CONTROL_ERROR_SLOP = 20; // +/- target sensor val to end control loop
 int CONTROL_NUM_LOOPS_MAX = 1000; // after N control loops, give up and return to input mode
 int CONTROL_NUM_LOOPS_STABLE = 5; // after N control loops within the target range, end control loop
 int CONTROL_OUTPUT_MAX = 255; // limit the maximum output sent to motor (safety first!)
-float CONTROL_KP = 0.2; // controller gain for proportional error
-float CONTROL_KI = 1.0; // controller gain for integral error
-float CONTROL_KD = 0.005; // controller gain for derivative error
+unsigned long CONTROL_DELTA_TIME_MIN = 1; // max control loop speed (in millis)
+
+// STATE_INPUT constants
+// TODO: calibrate NUM_LOOPS_STABLE
+int INPUT_NUM_LOOPS_STABLE = 10; // after N input loops within the slop range, match new position
+int INPUT_SLIDE_POSITION_SLOP = 100; // +/- sensor val range to match a point
 
 // Configure pinout
 // NOTE: do not set the pinMode() with analogRead(), just use analogRead()
@@ -51,14 +57,18 @@ SerialLogHandler logHandler;
 //SerialLogHandler logHandler(LOG_LEVEL_TRACE);
 
 // State variables
-int g_targetSlidePositionIndex = -1;  // target position index 0 - 7
 int g_actualSlidePositionIndex = 0;
 int g_actualSlidePositionSense = 0;
-unsigned long g_prevLoopTimeMillis = 0;
-int g_prevError = 0;
 int g_errorIntegral = 0;
 int g_numControlLoops = 0;
 int g_numStableControlLoops = 0;
+int g_numStableInputLoops = 0;
+int g_prevError = 0;
+int g_prevSlidePositionSense = 0;
+int g_targetSlidePositionIndex = -1;  // target position index 0 - 7
+unsigned long g_prevLoopTimeMillis = 0;
+
+// Overall state machine state
 enum DeviceState {
   STATE_INIT,
   STATE_INPUT,
@@ -137,15 +147,16 @@ void loop() {
 }
 
 void updateSenseValues() {
+  g_prevSlidePositionSense = g_actualSlidePositionSense;
   g_actualSlidePositionSense = analogRead(PIN_SLIDE_POSITION_SENSE); // analogRead range: 0-4095
 }
 
 void loopInput() {
-  // Check to see if we're in range (within +/- SLIDE_POSITION_SLOP) of a slide position
+  // Check to see if we're in range (within +/- INPUT_SLIDE_POSITION_SLOP) of a slide position
   int index = -1;
   for (int i = 0; i <= SLIDE_POSITION_MAX; ++i) {
-    if (g_actualSlidePositionSense >= (SLIDE_POSITION_POINTS[i] - SLIDE_POSITION_SLOP) &&
-        g_actualSlidePositionSense <= (SLIDE_POSITION_POINTS[i] + SLIDE_POSITION_SLOP)) {
+    if (g_actualSlidePositionSense >= (SLIDE_POSITION_POINTS[i] - INPUT_SLIDE_POSITION_SLOP) &&
+        g_actualSlidePositionSense <= (SLIDE_POSITION_POINTS[i] + INPUT_SLIDE_POSITION_SLOP)) {
       index = i;
       break;
     }
@@ -153,17 +164,25 @@ void loopInput() {
 
   // If we match a position, check to see when it changes
   if (index >= SLIDE_POSITION_MIN && index <= SLIDE_POSITION_MAX) {
-    if (g_actualSlidePositionIndex != index) {
-      // TODO: don't publish this immediately; update the lights "temporarily", have them pulse
-      // until "locked" in, etc.
-      Log.info("loopInput(): input index change %d -> %d", g_actualSlidePositionIndex, index);
-      Log.info("PUBLISH SPARK EVENT: togglDeviceActualPosIdxChange");
-      Particle.publish("togglDeviceActualPosIdxChange", String(index), 60, PRIVATE);
-      setProjectLEDs(index);
+    // Update the LEDs immediately...
+    setProjectLEDs(index);
+
+    // ...but wait until we stabilize at the new position to publish an event
+    if (g_actualSlidePositionIndex != index &&
+        abs(g_actualSlidePositionSense - g_prevSlidePositionSense) <= INPUT_SLIDE_POSITION_SLOP) {
+      g_numStableInputLoops += 1;
+      if (g_numStableInputLoops >= INPUT_NUM_LOOPS_STABLE) {
+        g_actualSlidePositionIndex = index;
+        Log.info("loopInput(): new actual position index %d, publishing!", g_actualSlidePositionIndex);
+        Log.info("PUBLISH SPARK EVENT: togglDeviceActualPosIdxChange");
+        Particle.publish("togglDeviceActualPosIdxChange", String(index), 60, PRIVATE);
+      }
+    } else {
+      g_numStableInputLoops = 0;
     }
-    g_actualSlidePositionIndex = index;
   } else {
     Log.trace("loopInput(): sense %d out of range of a position index", g_actualSlidePositionSense);
+    g_numStableInputLoops = 0;
   }
 
   Log.trace(

@@ -1,10 +1,10 @@
 {
   "name": "toggl-board-device",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "description": "Microcontroller code to operate the TogglBoard device.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run compile && npm run clean",
     "setup": "particle login && particle setup",
     "particle": "particle",
     "build": "npm run compile",

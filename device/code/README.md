@@ -6,11 +6,11 @@ This folder contains the source code for the Particle sketch that powers the Tog
 
 ### Setup
 1. `npm install`
-2. `npm run setup`
-3. Edit package.json `flash` script with your device name
+2. `npm run setup` to configure the Particle CLI, connect your device, etc.
+3. Edit package.json `config.device_name` with your Particle device name
 
-### Compile Image
-`npm run compile`
+### Test Compiling Image
+`npm test`
 
 ### Flash to Device
 `npm run flash`
