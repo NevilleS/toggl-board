@@ -28,6 +28,7 @@ const server = app.listen(app.get("port"), () => {
       TOGGL_PROJECT_IDS=${process.env.TOGGL_PROJECT_IDS}
       PARTICLE_API_TOKEN=${process.env.PARTICLE_API_TOKEN}
       PARTICLE_DEVICE_NAME=${process.env.PARTICLE_DEVICE_NAME}
+      SYNC_PERIOD_MS=${process.env.SYNC_PERIOD_MS}
   `)
   console.log(
     "\nTogglBoard is running at http://localhost:%d in '%s' mode",

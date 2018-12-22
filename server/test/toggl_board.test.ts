@@ -40,6 +40,7 @@ describe("TogglBoard", () => {
         6000,
         7000,
       ],
+      syncPeriodMs: 5000,
     }
   })
 
@@ -117,7 +118,6 @@ describe("TogglBoard", () => {
       })
 
       it("ignores Toggl entry changes with the same project", () => {
-        // TODO: probably shouldn't do this here.
         const result1 = TogglBoard.calculateAction(Object.assign({}, state, { toggl: { entryId: 999 } }), state, settings)
         expect(result1).toBe(null)
         const result2 = TogglBoard.calculateAction(Object.assign({}, state, { toggl: { entry: "My changed entry" } }), state, settings)
@@ -134,12 +134,6 @@ describe("TogglBoard", () => {
       it("updates the Toggl state", () => {
         const result = TogglBoard.calculateAction(Object.assign({}, state, { particle: { actualPosIdx: 7 } }), state, settings)
         expect(result).toEqual({ projectId: 7000 })
-      })
-
-      it.skip("ignores temporary changes in the Particle state", () => {
-        // TODO: this logic should likely be pushed into the device
-        const result = TogglBoard.calculateAction(Object.assign({}, state, { particle: { actualPosIdx: 7 } }), state, settings)
-        expect(result).toEqual({ projectId: 1000 })
       })
 
       it("stops the Toggl entry when the position goes to zero", () => {

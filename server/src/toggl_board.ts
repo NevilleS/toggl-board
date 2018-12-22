@@ -15,6 +15,7 @@ export interface TogglBoardSettings {
   toggl: TogglAPISettings
   particle: ParticleAPISettings
   togglProjectIDs: number[]
+  syncPeriodMs: number
 }
 
 type TogglBoardAction = TogglAPINewState | ParticleAPINewState | null

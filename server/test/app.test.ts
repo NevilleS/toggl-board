@@ -13,6 +13,8 @@ describe("app", () => {
   // Re-create the express app for each test
   let app: any
   beforeEach(() => {
+    jest.useFakeTimers()
+    jest.clearAllTimers()
     app = App()
   })
 
@@ -31,7 +33,7 @@ describe("app", () => {
     })
   })
 
-  describe("GET /sync", () => {
+  describe("PUT /sync", () => {
     let state: TogglBoardState
     beforeEach(() => {
       state = {
@@ -51,7 +53,7 @@ describe("app", () => {
 
     it("should run a sync", async () => {
       ;(TogglBoard.sync as any).mockResolvedValue(state)
-      const response = await request(app).get("/sync")
+      const response = await request(app).put("/sync")
       expect(TogglBoard.sync).toBeCalledWith(
         null,
         {
@@ -63,6 +65,7 @@ describe("app", () => {
             deviceName: "your Particle device name",
           },
           togglProjectIDs: [ 2, 3, 5, 7, 11, 13, 17 ],
+          syncPeriodMs: 5000,
         },
       )
       expect(response.status).toEqual(200)
@@ -70,18 +73,39 @@ describe("app", () => {
     })
 
     it("should store the returned state and provide in future calls", async () => {
-      ;(TogglBoard.sync as any).mockResolvedValue(state)
-
       // First request -> will get the "new state"
-      const response1 = await request(app).get("/sync")
+      ;(TogglBoard.sync as any).mockResolvedValue(state)
+      const response1 = await request(app).put("/sync")
       expect(TogglBoard.sync).toBeCalledWith(null, expect.anything())
       expect(response1.status).toEqual(200)
 
       // Second request -> should pass along the "new state"
-      const response2 = await request(app).get("/sync")
+      const response2 = await request(app).put("/sync")
       expect(TogglBoard.sync).toBeCalledWith(state, expect.anything())
       expect(response2.status).toEqual(200)
       expect(response2.body).toEqual({ message: "OK", data: state })
+    })
+
+    it("should catch errors and set the stored state to null for future calls", async () => {
+      const sync: any = TogglBoard.sync as any
+
+      // First request -> will get the "new state"
+      sync.mockResolvedValueOnce(state)
+      const response1 = await request(app).put("/sync")
+      expect(response1.status).toEqual(200)
+
+      // Second request -> should catch the error
+      sync.mockRejectedValue(new Error("I can't believe you've done this!"))
+      const response2 = await request(app).put("/sync")
+      expect(response2.status).toEqual(403)
+      expect(response2.body).toEqual({ message: "Sync failed!", data: {}, error: "I can't believe you've done this!" })
+
+      // Third request -> should pass in null state again
+      const response3 = await request(app).put("/sync")
+      expect(sync.mock.calls.length).toEqual(3)
+      expect(sync.mock.calls[0][0]).toEqual(null)
+      expect(sync.mock.calls[1][0]).toEqual(state)
+      expect(sync.mock.calls[2][0]).toEqual(null)
     })
   })
 
@@ -138,7 +162,21 @@ describe("app", () => {
     })
   })
 
-  it.skip("should run a sync every 30 seconds", () => {
+  it("should run a sync every SYNC_PERIOD_MS milliseconds", () => {
+    if (!process.env.SYNC_PERIOD_MS) {
+      throw new Error("Invalid test configuration of SYNC_PERIOD_MS!")
+    }
+    const testPeriod = parseInt(process.env.SYNC_PERIOD_MS)
+    ;(TogglBoard.sync as any).mockResolvedValue(null)
+
+    jest.advanceTimersByTime(testPeriod / 2)
+    expect(TogglBoard.sync).not.toBeCalled()
+
+    jest.advanceTimersByTime(testPeriod / 2 )
+    expect(TogglBoard.sync).toHaveBeenCalledTimes(1);
+
+    jest.advanceTimersByTime(testPeriod)
+    expect(TogglBoard.sync).toHaveBeenCalledTimes(2);
   })
 
   it.skip("should run a sync whenever Particle publishes a new event", () => {
