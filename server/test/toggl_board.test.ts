@@ -53,29 +53,79 @@ describe("TogglBoard", () => {
     })
 
     it("should pull the latest API state from both Toggl and Particle", async () => {
-      const result = await TogglBoard.sync(state, settings)
+      await TogglBoard.sync(state, settings)
       expect(TogglAPI.getCurrentState).toBeCalledWith(settings.toggl)
       expect(ParticleAPI.getCurrentState).toBeCalledWith(settings.particle)
     })
 
     it("should not call the Toggl or Particle API if already in sync", async () => {
-      const result = await TogglBoard.sync(state, settings)
+      await TogglBoard.sync(state, settings)
       expect(TogglAPI.setCurrentState).not.toBeCalled()
       expect(ParticleAPI.setCurrentState).not.toBeCalled()
     })
 
     it("should call the Particle API if the Toggl state changes", async () => {
       ;(TogglAPI.getCurrentState as any).mockResolvedValue(Object.assign({}, state.toggl, { projectId: 7000 }))
-      const result = await TogglBoard.sync(state, settings)
+      await TogglBoard.sync(state, settings)
       expect(TogglAPI.setCurrentState).not.toBeCalled()
       expect(ParticleAPI.setCurrentState).toBeCalled()
     })
 
+    it("should repeatedly call the Particle API after the Toggl state changes", async () => {
+      const newState = Object.assign({}, state, { toggl: { projectId: 7000 } })
+      ;(TogglAPI.getCurrentState as any).mockResolvedValue(Object.assign({}, state.toggl, { projectId: 7000 }))
+      await TogglBoard.sync(state, settings)
+      await TogglBoard.sync(newState, settings)
+      expect(TogglAPI.setCurrentState).not.toBeCalled()
+      expect(ParticleAPI.setCurrentState).toBeCalledTimes(2)
+    })
+
     it("should call the Toggl API if the Particle state changes", async () => {
       ;(ParticleAPI.getCurrentState as any).mockResolvedValue(Object.assign({}, state.particle, { actualPosIdx: 5 }))
-      const result = await TogglBoard.sync(state, settings)
+      await TogglBoard.sync(state, settings)
       expect(TogglAPI.setCurrentState).toBeCalled()
       expect(ParticleAPI.setCurrentState).not.toBeCalled()
+    })
+
+    // DEFER: our control loop *assumes* the Toggl API will update in a single loop, so it would
+    // fail this test. Ideally, we'd handle this error case by repeatedly hitting the Toggl API
+    // until the two states are back in sync, but instead we just assume the happy path. In
+    // practice, having the Toggl API "win" in this cases will be noticeable to the user so they can
+    // easily intervene if an error does actually occur by sliding the switch back to the project
+    // they wanted to select :)
+    it.skip("should repeatedly call the Toggl API after the Particle state changes", async () => {
+      const newState = Object.assign({}, state, { particle: { actualPosIdx: 5 } })
+      ;(ParticleAPI.getCurrentState as any).mockResolvedValue(Object.assign({}, state.particle, { actualPosIdx: 5 }))
+      await TogglBoard.sync(state, settings)
+      await TogglBoard.sync(newState, settings)
+      expect(TogglAPI.setCurrentState).toBeCalledTimes(2)
+      expect(ParticleAPI.setCurrentState).not.toBeCalled()
+    })
+
+    it("overrides the Particle state if both states change", async () => {
+      ;(TogglAPI.getCurrentState as any).mockResolvedValue(Object.assign({}, state.toggl, { projectId: 7000 }))
+      ;(ParticleAPI.getCurrentState as any).mockResolvedValue(Object.assign({}, state.particle, { actualPosIdx: 5 }))
+      await TogglBoard.sync(state, settings)
+      expect(TogglAPI.setCurrentState).not.toBeCalled()
+      expect(ParticleAPI.setCurrentState).toBeCalled()
+    })
+
+    it("overrides the Particle state if passed a null previous state", async () => {
+      ;(TogglAPI.getCurrentState as any).mockResolvedValue(Object.assign({}, state.toggl, { projectId: 7000 }))
+      ;(ParticleAPI.getCurrentState as any).mockResolvedValue(Object.assign({}, state.particle, { actualPosIdx: 5 }))
+      await TogglBoard.sync(null, settings)
+      expect(TogglAPI.setCurrentState).not.toBeCalled()
+      expect(ParticleAPI.setCurrentState).toBeCalled()
+    })
+
+    it("throws an error if the Toggl API throws", async () => {
+      ;(TogglAPI.getCurrentState as any).mockRejectedValue(new Error("Connection to Toggl API failed!"))
+      await expect(TogglBoard.sync(state, settings)).rejects.toThrow("Connection to Toggl API failed!")
+    })
+
+    it("throws an error if the Particle API throws", async () => {
+      ;(ParticleAPI.getCurrentState as any).mockRejectedValue(new Error("Connection to Particle API failed!"))
+      await expect(TogglBoard.sync(state, settings)).rejects.toThrow("Connection to Particle API failed!")
     })
   })
 
@@ -176,11 +226,6 @@ describe("TogglBoard", () => {
           settings,
         )
         expect(result).toEqual({ targetPosIdx: 2 })
-      })
-    })
-
-    describe.skip("when the Particle state goes offline", () => {
-      it("overrides the Particle state when it comes back online", () => {
       })
     })
   })

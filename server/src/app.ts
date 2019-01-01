@@ -42,7 +42,7 @@ export default function App() {
 
   app.get("/toggl/test", async function test(req, res) {
     try {
-      const connected = await TogglAPI.test({ token: settings.toggl.token })
+      const connected = await TogglAPI.test(settings.toggl)
       if (connected) {
         res.send({ message: "Successfully connected to Toggl API", data: {} })
         return
@@ -55,7 +55,7 @@ export default function App() {
 
   app.get("/toggl/current", async function current(req, res) {
     try {
-      const response = await TogglAPI.getCurrentState({ token: settings.toggl.token })
+      const response = await TogglAPI.getCurrentState(settings.toggl)
       res.send({
         message: "OK",
         data: response,
@@ -69,10 +69,7 @@ export default function App() {
 
   app.get("/particle/test", async function test(req, res) {
     try {
-      const connected = await ParticleAPI.test({
-        token: settings.particle.token,
-        deviceName: settings.particle.deviceName,
-      })
+      const connected = await ParticleAPI.test(settings.particle)
       if (connected) {
         res.send({ message: "Successfully connected to Particle API", data: {} })
         return
@@ -85,10 +82,7 @@ export default function App() {
 
   app.get("/particle/current", async function current(req, res) {
     try {
-      const response = await ParticleAPI.getCurrentState({
-        token: settings.particle.token,
-        deviceName: settings.particle.deviceName,
-      })
+      const response = await ParticleAPI.getCurrentState(settings.particle)
       res.send({
         message: "OK",
         data: response,
@@ -101,7 +95,7 @@ export default function App() {
   })
 
   // Schedule periodic syncs
-  setInterval(async () => {
+  let interval = setInterval(async () => {
     try {
       state = await TogglBoard.sync(state, settings)
       debug("sync success: new state (%o)", state)
