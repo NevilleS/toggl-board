@@ -179,6 +179,25 @@ describe("app", () => {
     expect(TogglBoard.sync).toHaveBeenCalledTimes(2);
   })
 
-  it.skip("should run a sync whenever Particle publishes a new event", () => {
+  describe("when subscribing to Particle API events", () => {
+    let appCallback: any = null
+    beforeEach(() => {
+      ;(ParticleAPI.subscribe as any).mockImplementation((listener: any, settings: any) => {
+        appCallback = listener
+        return true
+      })
+      app = App()
+    })
+
+    it("should call subscribe on startup", () => {
+      expect(ParticleAPI.subscribe).toBeCalled()
+    })
+
+    it("should run a sync whenever the Particle API event listener is called", () => {
+      expect(TogglBoard.sync).not.toBeCalled()
+      expect(appCallback).not.toBeNull()
+      appCallback({ type: "togglDeviceOn", data: {} })
+      expect(TogglBoard.sync).toBeCalled()
+    })
   })
 })

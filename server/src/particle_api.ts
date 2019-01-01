@@ -19,6 +19,16 @@ export interface ParticleAPINewState {
   targetPosIdx: number
 }
 
+export interface ParticleAPIEvent {
+  type: "togglDeviceOn" | "togglDeviceActualPosIdxChange"
+  data: {
+    data: string
+    ttl: number
+    published_at: string
+    coreid: string
+  }
+}
+
 interface ParticleAPIVariable {
   name: string
   result: number
@@ -70,6 +80,13 @@ const ParticleAPI = {
       throw new Error("Unexpected Particle response!")
     }
     return !!(response.return_value == 0)
+  },
+
+  subscribe: function(listener: (evt: ParticleAPIEvent) => Promise<void>, settings: ParticleAPISettings) {
+    console.log("subscribe()")
+    setTimeout(async () => {
+      await listener({} as any)
+    }, 1000)
   },
 
   getVariable: async function(variableName: string, settings: ParticleAPISettings): Promise<number> {

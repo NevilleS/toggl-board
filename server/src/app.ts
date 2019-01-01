@@ -20,6 +20,17 @@ export default function App() {
   const settings = getAppSettings()
   let state: TogglBoardState | null = null
 
+  const sync = async function() {
+    try {
+      state = await TogglBoard.sync(state, settings)
+      debug("sync success: new state (%o)", state)
+    } catch (e) {
+      debug("sync error: %s", e.message)
+      state = null
+      throw e
+    }
+  }
+
   // Routes
   app.get("/ping", function ping(req, res) {
     res.send({ message: "pong", data: {} })
@@ -27,17 +38,11 @@ export default function App() {
 
   app.put("/sync", async function current(req, res) {
     try {
-      state = await TogglBoard.sync(state, settings)
-      res.send({
-        message: "OK",
-        data: state,
-      })
-      return
+      await sync()
+      res.send({ message: "OK", data: state })
     } catch (e) {
-      var error = e.message
-      state = null
+      res.status(403).send({ message: "Sync failed!", data: {}, error: e.message })
     }
-    res.status(403).send({ message: "Sync failed!", data: {}, error })
   })
 
   app.get("/toggl/test", async function test(req, res) {
@@ -97,13 +102,16 @@ export default function App() {
   // Schedule periodic syncs
   let interval = setInterval(async () => {
     try {
-      state = await TogglBoard.sync(state, settings)
-      debug("sync success: new state (%o)", state)
-    } catch (e) {
-      debug("sync error: %s", e.message)
-      state = null
-    }
+      await sync()
+    } catch {}
   }, settings.syncPeriodMs)
+
+  // Listen for Particle API events
+  let listener = ParticleAPI.subscribe(async (_) => {
+    try {
+      await sync()
+    } catch {}
+  }, settings.particle)
 
   return app
 }
