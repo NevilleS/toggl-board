@@ -24,7 +24,7 @@ export interface TogglAPINewState {
 
 interface TogglAPICurrentUser {
   projects: TogglAPIProject[]
-  time_entries: TogglAPITimeEntry[]
+  time_entries?: TogglAPITimeEntry[]
 }
 
 interface TogglAPIProject {
@@ -138,12 +138,14 @@ const TogglAPI = {
     ) as { data: TogglAPICurrentUser }
 
     // Ensure it has all the data we expect...
-    if (!has(response, "data") || !has(response.data, "projects") || !has(response.data, "time_entries")) {
+    if (!has(response, "data") || !has(response.data, "projects")) {
       throw new Error("Unexpected Toggl response!")
     }
-    const projects = response.data.projects
-    const timeEntries = response.data.time_entries
-    if (!Array.isArray(projects) || !Array.isArray(timeEntries)) {
+    if (!has(response.data, "projects") || !Array.isArray(response.data.projects)) {
+      throw new Error("Unexpected Toggl response!")
+    }
+    // NOTE: time_entries is optional, but if it's defined ensure it's an array
+    if (has(response.data, "time_entries") && !Array.isArray(response.data.time_entries)) {
       throw new Error("Unexpected Toggl response!")
     }
     return response.data
@@ -151,7 +153,8 @@ const TogglAPI = {
 
   extractCurrentState(currentUser: TogglAPICurrentUser): TogglAPIState {
     // Extract the current entry & project from the TogglAPI data
-    const currentEntry = currentUser.time_entries.find(entry => !!(entry.duration && entry.duration < 0))
+    const entries = currentUser.time_entries || []
+    const currentEntry = entries.find(entry => !!(entry.duration && entry.duration < 0))
     if (!currentEntry) {
       return {
         entry: null,

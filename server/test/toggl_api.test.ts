@@ -92,6 +92,26 @@ describe("TogglAPI", () => {
       })
     })
 
+    describe("when no recent time entries", () => {
+      it("should return a null time entry", async () => {
+        fetch.mockResponse(JSON.stringify({
+          "data": {
+            "projects": projectsFixture,
+          }
+        }))
+
+        const response = await TogglAPI.getCurrentState(settings)
+        expect(fetch.mock.calls.length).toEqual(1)
+        expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
+        expect(response).toEqual({
+          entry: null,
+          entryId: null,
+          project: null,
+          projectId: null,
+        })
+      })
+    })
+
     describe("when current time entry is running", () => {
       it("should return the current time entry", async () => {
         fetch.mockResponse(JSON.stringify({
