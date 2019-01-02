@@ -1,6 +1,6 @@
 {
   "name": "toggl-board-server",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "description": "Web server to manage the TogglBoard device.",
   "scripts": {
     "build": "echo \"Error: no build specified\" && exit 1",
