@@ -2,15 +2,17 @@
 import * as dotenv from "dotenv"
 dotenv.config({ path: ".env" });
 
+import * as Debug from "debug"
 import App from "./app"
 import * as dedent from "dedent"
+const debug = Debug("server")
 
 /**
  * Start Express server.
  */
 const app = App()
 const server = app.listen(app.get("port"), () => {
-  console.log(
+  debug(
     "***********************************************************\n" +
     " _____ ___   ____  ____ _     ____   ___    _    ____  ____\n" +
     "|_   _/ _ \\ / ___|/ ___| |   | __ ) / _ \\  / \\  |  _ \\|  _ \\\n" +
@@ -19,7 +21,7 @@ const server = app.listen(app.get("port"), () => {
     "  |_| \\___/ \\____|\\____|_____|____/ \\___/_/   \\_\\_| \\_\\____/\n" +
     "***********************************************************\n"
   )
-  console.log(dedent`
+  debug(dedent`
     Current configuration (edit '.env' file to modify):
       NODE_ENV=${process.env.NODE_ENV}
       DEBUG=${process.env.DEBUG}
@@ -30,12 +32,12 @@ const server = app.listen(app.get("port"), () => {
       PARTICLE_DEVICE_NAME=${process.env.PARTICLE_DEVICE_NAME}
       SYNC_PERIOD_MS=${process.env.SYNC_PERIOD_MS}
   `)
-  console.log(
+  debug(
     "\nTogglBoard is running at http://localhost:%d in '%s' mode",
     app.get("port"),
     app.get("env")
   )
-  console.log("Press CTRL-C to stop\n")
+  debug("Press CTRL-C to stop\n")
 })
 
 export default server
