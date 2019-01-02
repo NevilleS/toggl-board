@@ -1,4 +1,5 @@
 import * as Debug from "debug"
+import EventSource = require("eventsource")
 import { has } from "lodash"
 import "isomorphic-fetch"
 declare const fetch: any // NOTE: this offends my sensibilities
@@ -83,10 +84,18 @@ const ParticleAPI = {
   },
 
   subscribe: function(listener: (evt: ParticleAPIEvent) => Promise<void>, settings: ParticleAPISettings) {
-    console.log("subscribe()")
-    setTimeout(async () => {
-      await listener({} as any)
-    }, 1000)
+    const source = new EventSource(`https://api.particle.io/v1/devices/${settings.deviceName}/events?access_token=${settings.token}`)
+    source.addEventListener("togglDeviceOn", (e: any) => {
+      debug("got togglDeviceOn event: (%o)", e)
+      listener(e)
+    })
+    source.addEventListener("togglDeviceActualPosIdxChange", (e: any) => {
+      debug("got togglDeviceActualPosIdxChange event: (%o)", e)
+      listener(e)
+    })
+    source.onerror = (e: any) => {
+      debug("error subscribing to Particle events: (%o)", e)
+    }
   },
 
   getVariable: async function(variableName: string, settings: ParticleAPISettings): Promise<number> {

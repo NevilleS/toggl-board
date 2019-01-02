@@ -65,9 +65,11 @@
     "preset": "ts-jest"
   },
   "dependencies": {
+    "@types/eventsource": "^1.0.2",
     "debug": "^4.1.1",
     "dedent": "^0.7.0",
     "dotenv": "^6.2.0",
+    "eventsource": "^1.0.7",
     "express": "^4.16.4",
     "lodash": "^4.17.11"
   }

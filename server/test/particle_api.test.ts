@@ -1,9 +1,12 @@
+import EventSource = require("eventsource")
+jest.mock("eventsource")
 import ParticleAPI from "../src/particle_api"
 declare const fetch: any
 
 describe("ParticleAPI", () => {
   beforeEach(() => {
     fetch.resetMocks()
+    ;(EventSource as any).mockClear()
   })
 
   // Some fixture data to use.
@@ -104,6 +107,40 @@ describe("ParticleAPI", () => {
         fetch.mockResponse(JSON.stringify({}))
         await expect(ParticleAPI.setCurrentState({ targetPosIdx: 2 }, settings)).rejects.toThrow("Unexpected Particle response!")
       })
+    })
+  })
+
+  describe("subscribe()", () => {
+    let listener: any
+    let MockEventSource: any
+
+    beforeEach(() => {
+      listener = jest.fn()
+      ;(EventSource as any).mockImplementation(() => {
+        let listeners: any = {}
+        MockEventSource = {
+          addEventListener: jest.fn((key, callback) => {
+            listeners[key] = callback
+          }),
+          listeners,
+        }
+        return MockEventSource
+      })
+    })
+
+    it("subscribes to relevant server-side events", () => {
+      ParticleAPI.subscribe(listener, settings)
+      expect(EventSource).toBeCalledWith("https://api.particle.io/v1/devices/my-particle-device/events?access_token=particle123")
+      expect(MockEventSource.addEventListener).toBeCalledWith("togglDeviceActualPosIdxChange", expect.anything())
+      expect(MockEventSource.addEventListener).toBeCalledWith("togglDeviceOn", expect.anything())
+    })
+
+    it("calls the listener when a relevant event fires", () => {
+      ParticleAPI.subscribe(listener, settings)
+      MockEventSource.listeners.togglDeviceOn()
+      expect(listener).toBeCalledTimes(1)
+      MockEventSource.listeners.togglDeviceActualPosIdxChange()
+      expect(listener).toBeCalledTimes(2)
     })
   })
 })
