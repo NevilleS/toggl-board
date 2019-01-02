@@ -40,6 +40,7 @@ interface TogglAPITimeEntry {
   pid?: number
   start?: string
   stop?: string
+  tags?: string[]
 }
 
 const TogglAPI = {
@@ -96,7 +97,7 @@ const TogglAPI = {
     }
 
     // Build a new entry
-    let timeEntry: TogglAPITimeEntry = { created_with: APP_NAME }
+    let timeEntry: TogglAPITimeEntry = { created_with: APP_NAME, tags: ["togglboard"] }
     if (state.entry) {
       timeEntry.description = state.entry
     }

@@ -228,6 +228,7 @@ describe("TogglAPI", () => {
           body: JSON.stringify({
             "time_entry": {
               "created_with": "TogglBoard",
+              "tags": ["togglboard"],
               "description": "Testing new entry",
               "pid": 1,
             }
@@ -312,6 +313,7 @@ describe("TogglAPI", () => {
           body: JSON.stringify({
             "time_entry": {
               "created_with": "TogglBoard",
+              "tags": ["togglboard"],
               "description": "Testing new entry",
             }
           })

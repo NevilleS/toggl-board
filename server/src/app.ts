@@ -107,7 +107,8 @@ export default function App() {
   }, settings.syncPeriodMs)
 
   // Listen for Particle API events
-  let listener = ParticleAPI.subscribe(async (_) => {
+  let listener = ParticleAPI.subscribe(async (e) => {
+    debug("got event from ParticleAPI: (%o)", e)
     try {
       await sync()
     } catch {}

@@ -22,13 +22,13 @@ int CONTROL_ERROR_DELTA_MAX = 100000; // max value the delta error can be per lo
 int CONTROL_ERROR_INTEGRAL_MAX = 100000; // max value the integral error can be per loop
 int CONTROL_ERROR_SLOP = 20; // +/- target sensor val to end control loop
 int CONTROL_NUM_LOOPS_MAX = 1000; // after N control loops, give up and return to input mode
-int CONTROL_NUM_LOOPS_STABLE = 5; // after N control loops within the target range, end control loop
+int CONTROL_NUM_LOOPS_STABLE = 10; // after N control loops within the target range, end control loop
 int CONTROL_OUTPUT_MAX = 255; // limit the maximum output sent to motor (safety first!)
 unsigned long CONTROL_DELTA_TIME_MIN = 1; // max control loop speed (in millis)
 
 // STATE_INPUT constants
 // TODO: calibrate NUM_LOOPS_STABLE
-int INPUT_NUM_LOOPS_STABLE = 10; // after N input loops within the slop range, match new position
+int INPUT_NUM_LOOPS_STABLE = 100; // after N input loops within the slop range, match new position
 int INPUT_SLIDE_POSITION_SLOP = 100; // +/- sensor val range to match a point
 
 // Configure pinout
