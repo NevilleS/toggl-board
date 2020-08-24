@@ -71,6 +71,6 @@
     "dotenv": "^6.2.0",
     "eventsource": "^1.0.7",
     "express": "^4.16.4",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.19"
   }
 }
