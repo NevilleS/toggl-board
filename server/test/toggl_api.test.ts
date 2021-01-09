@@ -327,4 +327,22 @@ describe("TogglAPI", () => {
       })
     })
   })
+
+  describe("getCurrentUser()", () => {
+    it("should return the Toggl user data", async () => {
+      fetch.mockResponse(JSON.stringify({
+        "data": {
+          "email": "mock.user@example.com",
+          "projects": projectsFixture
+        }
+      }))
+
+      const response = await TogglAPI.getCurrentUser(settings)
+      expect(fetch.mock.calls.length).toEqual(1)
+      expect(fetch.mock.calls[0][0]).toEqual("https://www.toggl.com/api/v8/me?with_related_data=true")
+      expect(response).toEqual({
+        projects: projectsFixture
+      })
+    })
+  })
 })
