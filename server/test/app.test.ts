@@ -130,6 +130,24 @@ describe("app", () => {
     })
   })
 
+  describe("GET /toggl/user", () => {
+    it("should return current Toggl API user", async () => {
+      const mockResponseData = {
+        api_token: "mocktoken",
+        email: "mock.user@example.com",
+        projects: [
+         { active: true, id: 1, name : "Mock Project 1" },
+         { active: true, id: 2, name : "Mock Project 2" },
+        ]
+      }
+      ;(TogglAPI.getCurrentUser as any).mockResolvedValue(mockResponseData)
+      const response = await request(app).get("/toggl/user")
+      expect(TogglAPI.getCurrentUser).toBeCalledWith({ token: "your Toggl API token" })
+      expect(response.status).toEqual(200)
+      expect(response.body).toEqual({ message: "OK", data: mockResponseData })
+    })
+  })
+
   describe("GET /particle/test", () => {
     it("should test Particle API", async () => {
       const mockResponseData = { online: true, ok: true }

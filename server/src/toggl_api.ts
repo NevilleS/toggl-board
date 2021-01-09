@@ -1,5 +1,5 @@
 import * as Debug from "debug"
-import { has } from "lodash"
+import { has, pick } from "lodash"
 import "isomorphic-fetch"
 declare const fetch: any // NOTE: this offends my sensibilities
 const debug = Debug("toggl-api")
@@ -149,7 +149,7 @@ const TogglAPI = {
     if (has(response.data, "time_entries") && !Array.isArray(response.data.time_entries)) {
       throw new Error("Unexpected Toggl response!")
     }
-    return response.data
+    return pick(response.data, ["projects", "time_entries"])
   },
 
   extractCurrentState(currentUser: TogglAPICurrentUser): TogglAPIState {

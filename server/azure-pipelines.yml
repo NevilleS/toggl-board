@@ -8,7 +8,7 @@ steps:
 - task: NodeTool@0
   displayName: 'Configure node version'
   inputs:
-    versionSpec: '8.x'
+    versionSpec: '14.x'
 
 - script: |
     cd server

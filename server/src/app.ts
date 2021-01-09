@@ -72,6 +72,20 @@ export default function App() {
     res.status(403).send({ message: "Connection to Toggl API failed!", data: {}, error })
   })
 
+  app.get("/toggl/user", async function current(req, res) {
+    try {
+      const response = await TogglAPI.getCurrentUser(settings.toggl)
+      res.send({
+        message: "OK",
+        data: response,
+      })
+      return
+    } catch (e) {
+      var error = e.message
+    }
+    res.status(403).send({ message: "Connection to Toggl API failed!", data: {}, error })
+  })
+
   app.get("/particle/test", async function test(req, res) {
     try {
       const connected = await ParticleAPI.test(settings.particle)

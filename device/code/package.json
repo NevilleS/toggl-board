@@ -1,6 +1,9 @@
 {
   "name": "toggl-board-device",
-  "version": "0.9.0",
+  "version": "0.9.5",
+  "engines": {
+    "node": "14.x"
+  },
   "description": "Microcontroller code to operate the TogglBoard device.",
   "main": "index.js",
   "scripts": {
@@ -8,7 +11,7 @@
     "setup": "particle login && particle setup",
     "particle": "particle",
     "build": "npm run compile",
-    "compile": "particle compile core toggl-board-device.ino",
+    "compile": "particle compile photon toggl-board-device.ino",
     "flash": "particle flash $npm_package_config_device_name toggl-board-device.ino",
     "clean": "rm *.bin"
   },
@@ -24,9 +27,9 @@
   "homepage": "https://github.com/NevilleS/toggl-board#readme",
   "dependencies": {},
   "devDependencies": {
-    "particle-cli": "^1.36.3"
+    "particle-cli": "^2.10.0"
   },
   "config": {
-    "device_name": "ns-core-1"
+    "device_name": "ns-toggl-board"
   }
 }
