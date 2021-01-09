@@ -11,7 +11,7 @@
     "setup": "particle login && particle setup",
     "particle": "particle",
     "build": "npm run compile",
-    "compile": "particle compile core toggl-board-device.ino",
+    "compile": "particle compile photon toggl-board-device.ino",
     "flash": "particle flash $npm_package_config_device_name toggl-board-device.ino",
     "clean": "rm *.bin"
   },
@@ -30,6 +30,6 @@
     "particle-cli": "^2.10.0"
   },
   "config": {
-    "device_name": "ns-toggle-board"
+    "device_name": "ns-toggl-board"
   }
 }
