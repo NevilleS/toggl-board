@@ -1,5 +1,5 @@
 // Overall Constants
-const char* VERSION = "0.9.5";
+const char* VERSION = "1.0.0";
 unsigned long LOOP_DELAY_MS = 1; // delay to slow down speed of the main loop
 int SLIDE_POSITION_MAX = 7;
 int SLIDE_POSITION_MIN = 0;
