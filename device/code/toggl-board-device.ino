@@ -1,5 +1,5 @@
 // Overall Constants
-const char* VERSION = "0.9";
+const char* VERSION = "0.9.5";
 unsigned long LOOP_DELAY_MS = 1; // delay to slow down speed of the main loop
 int SLIDE_POSITION_MAX = 7;
 int SLIDE_POSITION_MIN = 0;
@@ -24,7 +24,7 @@ int CONTROL_ERROR_SLOP = 20; // +/- target sensor val to end control loop
 int CONTROL_NUM_LOOPS_MAX = 1000; // after N control loops, give up and return to input mode
 int CONTROL_NUM_LOOPS_STABLE = 10; // after N control loops within the target range, end control loop
 int CONTROL_OUTPUT_MAX = 255; // limit the maximum output sent to motor (safety first!)
-unsigned long CONTROL_DELTA_TIME_MIN = 1; // max control loop speed (in millis)
+int CONTROL_DELTA_TIME_MIN = 1; // max control loop speed (in millis)
 
 // STATE_INPUT constants
 // TODO: calibrate NUM_LOOPS_STABLE
@@ -210,7 +210,7 @@ void loopControl() {
   // Compute time since last control loop, and check that it's reasonable (avoid divide by zero!)
   int deltaTime = millis() - g_prevLoopTimeMillis;
   if (deltaTime < CONTROL_DELTA_TIME_MIN) {
-    Log.error("loopControl(): deltaTime %lu too small to run controller", deltaTime);
+    Log.error("loopControl(): deltaTime %d too small to run controller", deltaTime);
     return;
   }
 
