@@ -27,7 +27,6 @@ int CONTROL_OUTPUT_MAX = 255; // limit the maximum output sent to motor (safety 
 int CONTROL_DELTA_TIME_MIN = 1; // max control loop speed (in millis)
 
 // STATE_INPUT constants
-// TODO: calibrate NUM_LOOPS_STABLE
 int INPUT_NUM_LOOPS_STABLE = 100; // after N input loops within the slop range, match new position
 int INPUT_SLIDE_POSITION_SLOP = 100; // +/- sensor val range to match a point
 
@@ -168,8 +167,7 @@ void loopInput() {
     setProjectLEDs(index);
 
     // ...but wait until we stabilize at the new position to publish an event
-    if (g_actualSlidePositionIndex != index &&
-        abs(g_actualSlidePositionSense - g_prevSlidePositionSense) <= INPUT_SLIDE_POSITION_SLOP) {
+    if (g_actualSlidePositionIndex != index) {
       g_numStableInputLoops += 1;
       if (g_numStableInputLoops >= INPUT_NUM_LOOPS_STABLE) {
         g_actualSlidePositionIndex = index;
@@ -182,6 +180,7 @@ void loopInput() {
     }
   } else {
     Log.trace("loopInput(): sense %d out of range of a position index", g_actualSlidePositionSense);
+    setProjectLEDs(-1);
     g_numStableInputLoops = 0;
   }
 
